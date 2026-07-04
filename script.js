@@ -67,72 +67,84 @@ const pizzas = [
  name:"Forno da Casa (A MAIS PEDIDA)",
  preco:74.90,
  precoBroto:49.90,
+imagem:"imagens/fornodacasa.jpg",
  descricao:"Molho, muçarela, presunto, frango, bacon, catupiry, cebola, pimentão, azeitona e orégano"
 },
 {
  name:"Costela",
  preco:74.90,
  precoBroto:49.90,
+imagem:"imagens/costela.jpg",
  descricao:"Molho, muçarela, costela bovina desfiada, cebola caramelizada, catupiry, pimentão e cebolinha "
 },
 {
  name:"A Moda",
  preco:54.90,
  precoBroto:34.90,
+imagem:"imagens/amoda.jpg",
  descricao:"Molho, muçarela, presunto, calabresa, cebola, tomate, pimentão, azeitona e orégano"
 },
 {
  name:"Calabresa",
  preco:54.90,
  precoBroto:34.90,
+imagem:"imagens/calabresa.jpg",
  descricao:"Molho, muçarela, calabresa, cebola, azeitona e orégano"
 },
 {
  name:"Mussarela",
  preco:54.90,
  precoBroto:34.90,
+imagem:"imagens/mussarela.jpg",
  descricao:"Molho, muçarela, azeitona e orégano"
 },
 {
  name:"Portuguesa",
  preco:57.90,
  precoBroto:39.90,
+imagem:"imagens/portuguesa.jpg",
  descricao:"Molho, muçarela, presunto, ovo, cebola, bacon, azeitona e orégano"
 },
 {
  name:"Frango com Catupiry",
  preco:64.90,
  precoBroto:39.90,
+imagem:"imagens/frangocatupiry.jpg",
  descricao:"Molho, muçarela, frango, catupiry, azeitona e orégano"
 },
 {
  name:"4 Queijos",
  preco:64.90,
  precoBroto:39.90,
+imagem:"imagens/4queijos.jpg",
  descricao:"Molho, muçarela, provolone, parmesão, catupiry, azeitona e orégano"
 },
 {
  name:"Caipira",
  preco:57.90,
  precoBroto:39.90,
+imagem:"imagens/caipira.jpg",
  descricao:"Molho, muçarela, frango, bacon, milho, cebola, azeitona e orégano"
 },
 {
  name:"Lombinho",
  preco:64.90,
  precoBroto:39.90,
+imagem:"imagens/lombinho.jpg",
  descricao:"Molho, muçarela, lombinho, catupiry, cebola, azeitona e orégano"
 },
 {
  name:"Marguerita",
  preco:44.90,
  precoBroto:29.90,
+imagem:"imagens/marguerita.jpg",
  descricao:"Molho, muçarela, manjericão, tomate, azeitona e orégano"
 },
 {
  name:"Palmito",
  preco:64.90,
  precoBroto:39.90,
+imagem:"imagens/palmito.jpg",
  descricao:"Molho, muçarela, palmito, pimentão, cebola, tomate, azeitona e orégano"
 }
 ];
@@ -245,6 +257,12 @@ const preco =
 
   lista.innerHTML += `
   <div class="sabor">
+
+<img
+        src="${pizza.imagem || ''}"
+        alt="${pizza.name}"
+        class="foto-pizza"
+    >
 
    <div>
 
