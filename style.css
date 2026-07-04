@@ -427,3 +427,24 @@ margin-top:10px;
 .btn-verde{
 background:#25D366;
 }
+.foto-pizza{
+    width:100px;
+    height:100px;
+    object-fit:cover;
+    border-radius:10px;
+    margin-bottom:8px;
+}
+.foto-pizza{
+    width:90px;
+    height:90px;
+    object-fit:cover;
+    border-radius:12px;
+    flex-shrink:0;
+}
+.sabor{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    padding:12px;
+    border-radius:12px;
+}
