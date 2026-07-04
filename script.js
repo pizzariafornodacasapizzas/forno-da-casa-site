@@ -60,7 +60,7 @@ const fretes = {
 
 };
 
-let tamanhoAtual = "grande";
+let tamanhoAtual = "familia";
 
 const pizzas = [
 {
@@ -204,9 +204,9 @@ function mostrarEtapaCustom(id){
 
 function selecionarTipo(tipo){
 
- if(tipo === "grande"){
+ if(tipo === "familia"){
 
-  tamanhoAtual = "grande";
+  tamanhoAtual = "familia";
   mostrarEtapaInteira();
 
  }
@@ -220,7 +220,7 @@ function selecionarTipo(tipo){
 
  else if(tipo === "meio"){
 
-  tamanhoAtual = "grande";
+  tamanhoAtual = "familia";
   mostrarEtapaMeio();
 
  }
@@ -749,7 +749,7 @@ document.getElementById("obs").value;
 pizzasTexto +=
 ` (${pizza.tamanho === "broto"
  ? "Broto - 4 pedaços"
- : "Grande - 8 pedaços"})`;
+ : "Família - 8 pedaços"})`;
 
 if(pizza.borda){
 
