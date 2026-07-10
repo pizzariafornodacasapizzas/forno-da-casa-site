@@ -5,55 +5,42 @@ const whatsapp = "5531971268087";
 
 const fretes = {
 
- "mata grande": 0,
- "vale das palmeiras 2": 0,
-"vale das palmeiras": 0,
-"iporanga": 0,
-"iporanga 2": 0,
-"são cristovão": 0,
-"sao cristovao": 0,
-"santo antonio": 0,
-"santa rosa": 0,
-"henrique nery": 5,
-"são jorge": 0,
-"sao jorge": 0,
-"são dimas": 0,
-"sao dimas": 0,
-"catarina": 0,
-"padre teodoro": 5,
-"padre teodoro 2": 5,
-"padre teodoro 1": 5,
-"varzea": 0,
-"várzea": 0,
-"novo horizonte": 0,
-"colorado": 3,
-"flórida": 0,
-"florida": 0,
-"são geraldo": 0,
-"sao geraldo": 0,
-"dona dora": 0,
-"donadora": 0,
-"progresso": 5,
-"morro do claro": 5,
-"industrias": 7,
-"bairro das industrias": 7,
-"centro": 5,
-"vapabuçu": 6,
-"canaa": 5,
-"jardim arizona": 7,
-"mangabeiras": 8,
-"mangabeira": 8,
-"boa vista": 5,
-"fatima": 5,
-"brasilia": 8,
-"nossa senhora do carmo": 5,
-"carmo": 5,
-"recanto do cedro": 0,
-"piedade": 0,
-"morro do claro": 5,
-"aeroporto industrial": 10,
-"aeroporto": 10,
-"jardim universitario": 3,
+ "Mata grande": 0,
+ "Vale das Palmeiras 2": 0,
+"Vale das Palmeiras": 0,
+"Iporanga": 0,
+"Iporanga 2": 0,
+"São Cristóvão": 0,
+"Santo Antônio": 0,
+"Santa Rosa": 0,
+"Henrique Nery": 5,
+"São Jorge": 0,
+"São Dimas": 0,
+"Catarina": 0,
+"Padre Teodoro": 5,
+"Padre Teodoro 2": 5,
+"Várzea": 0,
+"Novo Horizonte": 0,
+"Colorado": 3,
+"Flórida": 0,
+"São Geraldo": 0,
+"Dona Dora": 0,
+"Progresso": 5,
+"Morro do Claro": 5,
+"Bairro das Indústrias": 7,
+"Centro": 5,
+"Vapabuçu": 6,
+"Canaã": 5,
+"Jardim Arizona": 7,
+"Mangabeiras": 8,
+"Boa Vista": 5,
+"Fatima": 5,
+"Brasilia": 8,
+"Nossa Senhora do Carmo": 5,
+"Recanto do Cedro": 0,
+"Piedade": 0,
+"Aeroporto Industrial": 10,
+"Jardim Universitário": 3,
 
 
 
@@ -658,20 +645,27 @@ function mostrarCarrinho(){
  mostrarEtapa(6);
 
 }
+function normalizarTexto(texto) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
 
 function calcularFrete(){
 
- const bairro =
- document.getElementById("bairro")
- .value
- .trim()
- .toLowerCase();
+const bairro = normalizarTexto(
+ document.getElementById("bairro").value
+);
 
  const subtotal =
  totalPizzas() + totalBebidas();
 
- if(fretes[bairro] === undefined){
-
+const bairroEncontrado =
+encontrarBairroMaisProximo(bairro);
+ 
+if(!bairroEncontrado){
   alert(
    "Bairro não cadastrado. Envie seu pedido e calcularemos o frete no WhatsApp."
   );
@@ -683,7 +677,7 @@ function calcularFrete(){
  }else{
 
   pedido.frete =
-  fretes[bairro];
+  fretes[bairroEncontrado];
 
   pedido.total =
   subtotal + pedido.frete;
@@ -957,11 +951,9 @@ function reiniciarPedido(){
 
 function verificarFrete(){
 
- const bairro =
- document.getElementById("bairro")
- .value
- .trim()
- .toLowerCase();
+ const bairro = normalizarTexto(
+ document.getElementById("bairro").value
+);
 
  const info =
  document.getElementById("infoFrete");
@@ -975,7 +967,12 @@ function verificarFrete(){
 
  }
 
- if(fretes[bairro] === undefined){
+ const bairroEncontrado =
+Object.keys(fretes).find(b =>
+  normalizarTexto(b).includes(bairro)
+);
+
+if(!bairroEncontrado){
 
   info.style.display = "block";
   info.innerHTML =
@@ -985,7 +982,7 @@ function verificarFrete(){
 
  }
 
- if(fretes[bairro] === 0){
+ if(fretes[bairroEncontrado] === 0){
 
   info.style.display = "block";
   info.innerHTML =
@@ -995,11 +992,62 @@ function verificarFrete(){
 
   info.style.display = "block";
   info.innerHTML =
-  `🚚 Frete: R$ ${fretes[bairro].toFixed(2)}`;
-
+  `🚚 Frete: R$ ${fretes[bairroEncontrado].toFixed(2)}`
  }
 
 }
+
+function mostrarSugestoesBairro(){
+
+  const texto = normalizarTexto(
+    document.getElementById("bairro").value
+  );
+
+  const caixa =
+  document.getElementById("sugestoesBairro");
+
+  if(texto.length < 2){
+
+    caixa.innerHTML = "";
+    return;
+
+  }
+
+  const encontrados =
+  Object.keys(fretes).filter(bairro =>
+    normalizarTexto(bairro).includes(texto)
+  );
+
+  caixa.innerHTML = "";
+
+  encontrados.forEach(bairro => {
+
+    caixa.innerHTML += `
+      <div
+        class="sugestao-item"
+        onclick="selecionarBairro('${bairro}')"
+      >
+        ${bairro}
+      </div>
+    `;
+
+  });
+
+}
+
+function selecionarBairro(bairro){
+
+  document.getElementById("bairro").value =
+  bairro;
+
+  document.getElementById("sugestoesBairro")
+  .innerHTML = "";
+
+  verificarFrete();
+
+}
+
+
 
 function atualizarStatusLoja(){
 
@@ -1040,3 +1088,69 @@ function atualizarStatusLoja(){
 
 atualizarStatusLoja();
 mostrarEtapa(1);
+function distanciaTexto(a, b) {
+
+  a = normalizarTexto(a);
+  b = normalizarTexto(b);
+
+  const matriz = [];
+
+  for(let i = 0; i <= b.length; i++){
+    matriz[i] = [i];
+  }
+
+  for(let j = 0; j <= a.length; j++){
+    matriz[0][j] = j;
+  }
+
+  for(let i = 1; i <= b.length; i++){
+
+    for(let j = 1; j <= a.length; j++){
+
+      if(b.charAt(i-1) === a.charAt(j-1)){
+
+        matriz[i][j] = matriz[i-1][j-1];
+
+      }else{
+
+        matriz[i][j] = Math.min(
+          matriz[i-1][j-1] + 1,
+          matriz[i][j-1] + 1,
+          matriz[i-1][j] + 1
+        );
+
+      }
+
+    }
+
+  }
+
+  return matriz[b.length][a.length];
+}
+function encontrarBairroMaisProximo(textoDigitado){
+
+  textoDigitado = normalizarTexto(textoDigitado);
+
+  let melhorBairro = null;
+  let menorDistancia = 999;
+
+  Object.keys(fretes).forEach(bairro => {
+
+    const distancia =
+      distanciaTexto(textoDigitado, bairro);
+
+    if(distancia < menorDistancia){
+
+      menorDistancia = distancia;
+      melhorBairro = bairro;
+
+    }
+
+  });
+
+  if(menorDistancia <= 3){
+    return melhorBairro;
+  }
+
+  return null;
+}
