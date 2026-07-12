@@ -449,6 +449,7 @@ background:#25D366;
     border-radius:12px;
 }
 #sugestoesBairro{
+  display:none;
   background:#fff;
   border:1px solid #ddd;
   border-radius:8px;
@@ -464,4 +465,14 @@ background:#25D366;
 
 .sugestao-item:hover{
   background:#f0f0f0;
+}
+#formaPagamento{
+    color:#666;
+}
+
+#formaPagamento:valid{
+    color:#333;
+}
+#formaPagamento:valid{
+    color:#333;
 }
