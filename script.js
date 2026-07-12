@@ -748,6 +748,9 @@ function finalizarPedido(){
 const complemento =
 document.getElementById("complemento").value;
 
+const formaPagamento =
+document.getElementById("formaPagamento").value;
+
 const obs =
 document.getElementById("obs").value;
 
@@ -818,6 +821,8 @@ Frete: ${
 }
 --------------------------------
 Total: R$ ${pedido.total.toFixed(2)}
+
+Forma de Pagamento: ${formaPagamento}
 
 Observações:
 ${obs}
@@ -997,6 +1002,17 @@ if(!bairroEncontrado){
 
 }
 
+function selecionarBairro(bairro){
+
+  document.getElementById("bairro").value = bairro;
+
+  document.getElementById("sugestoesBairro").style.display = "none";
+  document.getElementById("sugestoesBairro").innerHTML = "";
+
+  verificarFrete();
+
+}
+
 function mostrarSugestoesBairro(){
 
   const texto = normalizarTexto(
@@ -1008,6 +1024,7 @@ function mostrarSugestoesBairro(){
 
   if(texto.length < 2){
 
+    caixa.style.display = "none";
     caixa.innerHTML = "";
     return;
 
@@ -1018,6 +1035,15 @@ function mostrarSugestoesBairro(){
     normalizarTexto(bairro).includes(texto)
   );
 
+  if(encontrados.length === 0){
+
+    caixa.style.display = "none";
+    caixa.innerHTML = "";
+    return;
+
+  }
+
+  caixa.style.display = "block";
   caixa.innerHTML = "";
 
   encontrados.forEach(bairro => {
@@ -1034,19 +1060,6 @@ function mostrarSugestoesBairro(){
   });
 
 }
-
-function selecionarBairro(bairro){
-
-  document.getElementById("bairro").value =
-  bairro;
-
-  document.getElementById("sugestoesBairro")
-  .innerHTML = "";
-
-  verificarFrete();
-
-}
-
 
 
 function atualizarStatusLoja(){
