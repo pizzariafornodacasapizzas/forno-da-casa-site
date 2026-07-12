@@ -213,6 +213,17 @@ oninput="verificarFrete(); mostrarSugestoesBairro();">
 
 <div id="sugestoesBairro"></div>
 <div id="infoFrete"></div>
+
+<select id="formaPagamento" required>
+    <option value="" selected disabled>
+        Forma de Pagamento
+    </option>
+    <option value="Dinheiro">💵 Dinheiro</option>
+    <option value="Pix">📱 Pix</option>
+    <option value="Cartão de Crédito">💳 Cartão de Crédito</option>
+    <option value="Cartão de Débito">💳 Cartão de Débito</option>
+</select>
+
 <textarea id="obs" placeholder="Observações"></textarea>
 
 <button class="btn-frete" onclick="calcularFrete()">
