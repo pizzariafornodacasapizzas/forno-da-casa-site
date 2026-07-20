@@ -32,6 +32,8 @@ const fretes = {
 "Vapabuçu": 6,
 "Canaã": 5,
 "Jardim Arizona": 7,
+"Santa Helena": 7,
+"Cemig": 7,
 "Mangabeiras": 8,
 "Boa Vista": 5,
 "Fatima": 5,
