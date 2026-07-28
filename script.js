@@ -325,24 +325,7 @@ function escolherPizza(nome,preco){
 
  mostrarEtapa(4);
 
- const valorBorda =
- document.getElementById("valorBorda");
-
- if(valorBorda){
-
-    if(tamanhoAtual === "broto"){
-
-        valorBorda.innerHTML =
-        "R$ 7,90";
-
-    }else{
-
-        valorBorda.innerHTML =
-        "R$ 11,90";
-
-    }
-
- }
+atualizarValorBorda();
 
 }
 
@@ -376,6 +359,8 @@ function confirmarMeioMeio(){
 });
 
  atualizarCarrinhoFlutuante();
+
+atualizarValorBorda();
 
  mostrarEtapa(4);
 
@@ -1181,4 +1166,15 @@ function encontrarBairroMaisProximo(textoDigitado){
   }
 
   return null;
+}
+function atualizarValorBorda(){
+
+    const valor =
+        tamanhoAtual === "broto"
+        ? "Acréscimo: R$ 7,90"
+        : "Acréscimo: R$ 11,90";
+
+    document.getElementById("valorBordaCatupiry").innerHTML = valor;
+    document.getElementById("valorBordaCheddar").innerHTML = valor;
+
 }
