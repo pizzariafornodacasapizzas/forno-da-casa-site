@@ -14,6 +14,36 @@
 
 <body>
 
+<!--AVISO DE RECESSO -->
+
+<!--
+<div id="avisoFerias" class="aviso-ferias">
+    <div class="aviso-conteudo">
+
+        <img src="logo.jpeg" alt="Forno da Casa" class="logo-ferias">
+
+        
+        <h2>🍕 ESTAMOS EM UMA BREVE PAUSA</h2>
+
+        <p>
+            Entre os dias <strong>14/08 e 18/08</strong>,
+            estaremos fechados para um período de descanso e melhorias.
+        </p>
+
+        <p>
+            Em breve estaremos de volta preparando suas pizzas favoritas com todo o carinho de sempre.
+</p>
+
+        <p>
+
+ Agradecemos sua preferência e compreensão.❤️
+        </p>
+
+    </div>
+</div>
+-->
+
+
 <!-- ETAPA 1 -->
 
 <section id="etapa1" class="tela home">
@@ -106,27 +136,37 @@ Continuar
 
 <section id="etapa4" class="tela">
 
-<h2>Deseja adicionar borda?</h2>
+    <h2>Deseja adicionar borda?</h2>
 
-<div class="opcoes">
+    <div class="opcoes">
 
-<button class="opcao" onclick="selecionarBorda(false)">
-Borda Tradicional
-</button>
+        <button class="opcao" onclick="selecionarBorda(false)">
+            Borda Tradicional
+        </button>
 
-<button
-    id="btnBorda"
-    class="opcao"
-    onclick="selecionarBorda(true)"
->
-    Borda de Catupiry
-    <br>
-    <small id="valorBorda">
-        Acréscimo: R$ 11,90
-    </small>
-</button>
+        <button
+            class="opcao"
+            onclick="selecionarBorda('catupiry')"
+        >
+            Borda de Catupiry
+            <br>
+            <small id="valorBordaCatupiry">
+                Acréscimo: R$ 11,90
+            </small>
+        </button>
 
-</div>
+        <button
+            class="opcao"
+            onclick="selecionarBorda('cheddar')"
+        >
+            Borda de Cheddar
+            <br>
+            <small id="valorBordaCheddar">
+                Acréscimo: R$ 11,90
+            </small>
+        </button>
+
+    </div>
 
 </section>
 
