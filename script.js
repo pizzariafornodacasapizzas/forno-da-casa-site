@@ -123,12 +123,20 @@ imagem:"imagens/lombinho.jpg",
  descricao:"Molho, muçarela, lombinho, catupiry, cebola, azeitona e orégano"
 },
 {
+ name:"Lombinho com Cheddar",
+ preco:64.90,
+ precoBroto:39.90,
+imagem:"imagens/lombinhocheddar.jpg",
+ descricao:"Molho, muçarela, lombinho, catupiry, cheddar, cebola, azeitona e orégano"
+},
+{
  name:"Marguerita",
  preco:44.90,
  precoBroto:29.90,
 imagem:"imagens/marguerita.jpg",
  descricao:"Molho, muçarela, manjericão, tomate, azeitona e orégano"
 },
+/*
 {
  name:"Palmito",
  preco:64.90,
@@ -136,6 +144,7 @@ imagem:"imagens/marguerita.jpg",
 imagem:"imagens/palmito.jpg",
  descricao:"Molho, muçarela, palmito, pimentão, cebola, tomate, azeitona e orégano"
 }
+*/
 ];
 
 const bebidas = [
