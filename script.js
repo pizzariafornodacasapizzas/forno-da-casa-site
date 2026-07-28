@@ -315,12 +315,13 @@ function mostrarEtapaMeio(){
 function escolherPizza(nome,preco){
 
  pedido.pizzas.push({
-  sabor:nome,
-  preco:preco,
-  tamanho:tamanhoAtual,
-  borda:false,
-  precoBorda:0
- });
+    sabor:nome,
+    preco:preco,
+    tamanho:tamanhoAtual,
+    borda:false,
+    tipoBorda:"",
+    precoBorda:0
+});
 
  mostrarEtapa(4);
 
@@ -370,6 +371,7 @@ function confirmarMeioMeio(){
  sabor:`Meio a Meio: ${s1} / ${s2}`,
  preco:(p1.preco + p2.preco)/2,
  borda:false,
+ tipoBorda:"",
  precoBorda:0
 });
 
@@ -379,37 +381,30 @@ function confirmarMeioMeio(){
 
 }
 
-function selecionarBorda(sim){
+function selecionarBorda(tipo){
 
- let ultimaPizza =
- pedido.pizzas[pedido.pizzas.length - 1];
+    let ultimaPizza = pedido.pizzas[pedido.pizzas.length-1];
 
- ultimaPizza.borda = sim;
+    if(tipo === false){
 
- if(sim){
+        ultimaPizza.borda = false;
+        ultimaPizza.tipoBorda = "";
+        ultimaPizza.precoBorda = 0;
 
-  if(ultimaPizza.tamanho === "broto"){
+    }else{
 
-   ultimaPizza.precoBorda = 7.90;
+        ultimaPizza.borda = true;
+        ultimaPizza.tipoBorda = tipo;
 
-  }else{
+        ultimaPizza.precoBorda =
+            ultimaPizza.tamanho === "broto"
+            ? 7.90
+            : 11.90;
+    }
 
-   ultimaPizza.precoBorda = 11.90;
-
-  }
-
- }else{
-
-  ultimaPizza.precoBorda = 0;
-
- }
-
- atualizarCarrinhoFlutuante();
-
- carregarBebidas();
-
- mostrarEtapa(5);
-
+    atualizarCarrinhoFlutuante();
+    carregarBebidas();
+    mostrarEtapa(5);
 }
 
 function carregarBebidas(){
@@ -608,8 +603,12 @@ function mostrarCarrinho(){
  </small>
 
  ${pizza.borda
- ? "<br> Borda Catupiry"
- : ""}
+? `<br>Borda ${
+    pizza.tipoBorda === "cheddar"
+        ? "Cheddar"
+        : "Catupiry"
+}`
+: ""}
 </p>
 `;
 
@@ -780,8 +779,9 @@ pizzasTexto +=
 if(pizza.borda){
 
  pizzasTexto +=
- " + Borda Catupiry";
-
+ pizza.tipoBorda === "cheddar"
+        ? " + Borda Cheddar"
+        : " + Borda Catupiry";
 }
 
   pizzasTexto += "\n";
@@ -905,7 +905,11 @@ function mostrarConfirmacao(){
 
    html += `
 <p>
- Borda Catupiry
+ Borda ${
+    pizza.tipoBorda === "cheddar"
+        ? "Cheddar"
+        : "Catupiry"
+}
 - R$ ${pizza.precoBorda.toFixed(2)}
 </p>
 `;
