@@ -476,3 +476,27 @@ background:#25D366;
 #formaPagamento:valid{
     color:#333;
 }
+.aviso-ferias{
+    position:fixed;
+    inset:0;
+    background:url('pizza-home.jpeg') center/cover no-repeat;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
+
+.aviso-conteudo{
+    background:rgba(0,0,0,.75);
+    color:white;
+    max-width:550px;
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+}
+
+.logo-ferias{
+    width:140px;
+    border-radius:20px;
+    margin-bottom:20px;
+}
