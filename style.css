@@ -16,6 +16,7 @@ color:#333;
 display:none;
 min-height:100vh;
 padding:20px;
+padding-bottom:130px;
 }
 
 h2{
@@ -126,6 +127,7 @@ border-radius:15px;
 font-size:18px;
 font-weight:600;
 box-shadow:0 3px 10px rgba(0,0,0,.1);
+transition:.15s;
 }
 
 .continuar{
@@ -152,6 +154,7 @@ border:1px solid #ddd;
 border-radius:12px;
 font-size:16px;
 background:white;
+transition:.15s;
 }
 
 textarea{
@@ -159,17 +162,24 @@ height:120px;
 resize:none;
 }
 
+/* NOVO: destaque de campo obrigatório não preenchido */
+.campo-erro{
+    border:2px solid #d32f2f !important;
+    background:#fff5f5 !important;
+}
+
 /* SABORES */
 
 .sabor{
 background:white;
-padding:18px;
+padding:12px;
 margin-bottom:12px;
 border-radius:12px;
 display:flex;
-justify-content:space-between;
+gap:12px;
 align-items:center;
 box-shadow:0 2px 8px rgba(0,0,0,.08);
+transition:.15s;
 }
 
 .preco{
@@ -188,6 +198,28 @@ font-size:28px;
 display:flex;
 align-items:center;
 justify-content:center;
+flex-shrink:0;
+margin-left:auto;
+}
+
+.sabor.selecionado-sabor{
+    border:3px solid #25D366;
+    background:#eafff2;
+}
+
+.foto-pizza{
+    width:90px;
+    height:90px;
+    object-fit:cover;
+    border-radius:12px;
+    flex-shrink:0;
+}
+
+.descricao-pizza{
+    font-size:13px;
+    color:#666;
+    margin:4px 0;
+    line-height:18px;
 }
 
 /* BEBIDAS */
@@ -219,7 +251,8 @@ justify-content:center;
 /* RESUMOS */
 
 #resumoPedido,
-#resumoFinal{
+#resumoFinal,
+#resumoConfirmacao{
 background:white;
 padding:20px;
 border-radius:15px;
@@ -228,11 +261,12 @@ margin-bottom:20px;
 }
 
 #resumoPedido p,
-#resumoFinal p{
+#resumoFinal p,
+#resumoConfirmacao p{
 margin-bottom:10px;
 }
 
-/* BOTÕES FINAIS */
+/* BOTÕES DA CONFIRMAÇÃO (Corrigir / Continuar) */
 
 .botoes{
 display:flex;
@@ -248,12 +282,12 @@ font-size:16px;
 font-weight:600;
 }
 
-.botoes button:first-child{
+.botoes button:nth-child(1){
 background:#ff9800;
 color:white;
 }
 
-.botoes button:last-child{
+.botoes button:nth-child(2){
 background:#25D366;
 color:white;
 }
@@ -280,27 +314,51 @@ left:15px;
 right:15px;
 background:#25D366;
 color:white;
-padding:15px;
 border-radius:15px;
 display:none;
-align-items:center;
-justify-content:space-between;
 box-shadow:0 5px 20px rgba(0,0,0,.25);
 z-index:9999;
-
-/* NOVO */
-max-height:180px;
-overflow-y:auto;
+max-height:220px;
+overflow:hidden;
+cursor:pointer;
 }
 
-.carrinho-info{
+.carrinho-resumido{
 display:flex;
-flex-direction:column;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+padding:14px 18px;
+font-weight:700;
+font-size:15px;
+}
+
+.seta-carrinho{
+font-size:12px;
+opacity:.85;
+}
+
+.carrinho-expandido{
+display:none;
+padding:0 18px 16px 18px;
+border-top:1px solid rgba(255,255,255,.25);
+margin-top:2px;
+padding-top:10px;
 }
 
 #resumoFlutuante{
-font-size:14px;
-line-height:20px;
+font-size:13px;
+line-height:19px;
+max-height:90px;
+overflow-y:auto;
+text-align:left;
+}
+
+#totalFlutuante{
+font-size:20px;
+font-weight:bold;
+margin-top:8px;
+text-align:right;
 }
 
 #totalFlutuante{
@@ -309,40 +367,22 @@ font-weight:bold;
 margin-top:5px;
 }
 
-.btn-carrinho{
-background:white;
-color:#25D366;
-border:none;
-padding:12px 20px;
-border-radius:10px;
-font-weight:bold;
-}
-
-/* CONTADOR DE BEBIDAS */
-
-.contador-bebida{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.btn-menos,
-.btn-mais{
-width:38px !important;
-height:38px !important;
-border-radius:50%;
-border:none;
-background:#25D366;
-color:white;
-font-size:22px;
-font-weight:bold;
-}
-
-.qtd-bebida{
-font-size:18px;
-font-weight:bold;
-min-width:20px;
-text-align:center;
+/* NOVO: botão continuar fixo do Passo 1 - aparece na hora, sem precisar rolar */
+.btn-continuar-fixo{
+    display:none;
+    position:fixed;
+    left:15px;
+    right:15px;
+    bottom:85px;
+    background:#25D366;
+    color:white;
+    border:none;
+    padding:18px;
+    border-radius:15px;
+    font-size:18px;
+    font-weight:700;
+    box-shadow:0 5px 20px rgba(0,0,0,.3);
+    z-index:9998;
 }
 
 /* MOBILE */
@@ -362,55 +402,25 @@ font-size:20px;
 }
 
 }
-.carrinho-info{
-    text-align:center;
-}
+
 .btn-frete{
     width:100%;
     padding:18px;
     margin-top:15px;
-
     background:#25D366;
     color:white;
-
     border:none;
     border-radius:12px;
-
     font-size:18px;
     font-weight:700;
-
     cursor:pointer;
-
     transition:.2s;
 }
 
 .btn-frete:hover{
     transform:scale(1.02);
 }
-.descricao-pizza{
-    font-size:13px;
-    color:#666;
-    margin:4px 0;
-    line-height:18px;
-}
 
-.tela{
-    padding-bottom:140px;
-}
-
-.carrinho-flutuante{
-    max-height:100px;
-    overflow:hidden;
-}
-
-#resumoFlutuante{
-    max-height:50px;
-    overflow-y:auto;
-}
-
-#totalFlutuante{
-    margin-top:5px;
-}
 #infoFrete{
 padding:10px;
 margin-bottom:12px;
@@ -419,35 +429,11 @@ font-weight:600;
 display:none;
 background:#f5f5f5;
 }
-.btn-voltar{
-background:#666;
-color:white;
-margin-top:10px;
-}
+
 .btn-verde{
 background:#25D366;
 }
-.foto-pizza{
-    width:100px;
-    height:100px;
-    object-fit:cover;
-    border-radius:10px;
-    margin-bottom:8px;
-}
-.foto-pizza{
-    width:90px;
-    height:90px;
-    object-fit:cover;
-    border-radius:12px;
-    flex-shrink:0;
-}
-.sabor{
-    display:flex;
-    gap:12px;
-    align-items:center;
-    padding:12px;
-    border-radius:12px;
-}
+
 #sugestoesBairro{
   display:none;
   background:#fff;
@@ -466,6 +452,7 @@ background:#25D366;
 .sugestao-item:hover{
   background:#f0f0f0;
 }
+
 #formaPagamento{
     color:#666;
 }
@@ -473,30 +460,201 @@ background:#25D366;
 #formaPagamento:valid{
     color:#333;
 }
-#formaPagamento:valid{
-    color:#333;
-}
-.aviso-ferias{
-    position:fixed;
-    inset:0;
-    background:url('pizza-home.jpeg') center/cover no-repeat;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:99999;
+
+/* ===== INDICADOR DE PROGRESSO ===== */
+
+.progresso{
+    display:none;
+    position:sticky;
+    top:0;
+    background:#f5f5f5;
+    padding:14px 20px 10px 20px;
+    z-index:100;
 }
 
-.aviso-conteudo{
-    background:rgba(0,0,0,.75);
-    color:white;
-    max-width:550px;
-    padding:30px;
-    border-radius:20px;
+.progresso-texto{
+    font-size:13px;
+    font-weight:600;
+    color:#777;
+    margin-bottom:6px;
     text-align:center;
 }
 
-.logo-ferias{
-    width:140px;
-    border-radius:20px;
+.progresso-barra{
+    width:100%;
+    height:6px;
+    background:#e5e5e5;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.progresso-fill{
+    height:100%;
+    width:0%;
+    background:#25D366;
+    border-radius:10px;
+    transition:width .25s ease;
+}
+
+/* ===== PASSO 2: borda + bebida ===== */
+
+.titulo-bebida{
+    margin-top:30px;
+    padding-top:20px;
+    border-top:2px dashed #e0e0e0;
+}
+
+/* destaque visual da borda escolhida */
+
+.opcao.selecionado{
+    border:3px solid #25D366 !important;
+    background:#eafff2;
+    box-shadow:0 3px 10px rgba(37,211,102,.3);
+}
+
+.opcao.selecionado::after{
+    content:" ✅";
+}
+
+/* card de borda por pizza */
+
+.card-pizza-borda{
+    background:white;
+    padding:18px;
+    border-radius:15px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
     margin-bottom:20px;
+}
+
+.card-pizza-borda h3{
+    color:#b71c1c;
+    font-size:17px;
+    margin-bottom:2px;
+}
+
+.tamanho-pizza-borda{
+    color:#888;
+    display:block;
+    margin-bottom:14px;
+}
+
+.opcoes-borda-pizza{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.opcao-pequena{
+    padding:14px;
+    font-size:15px;
+    text-align:left;
+}
+
+/* ===== PASSO 1: títulos, instruções e pizzas já adicionadas ===== */
+
+.titulo-tipo{
+    color:#b71c1c;
+    font-size:18px;
+    margin-top:28px;
+    margin-bottom:6px;
+    padding-top:20px;
+    border-top:2px dashed #e0e0e0;
+}
+
+.titulo-tipo:first-of-type{
+    margin-top:10px;
+    padding-top:0;
+    border-top:none;
+}
+
+.instrucao-sabor{
+    font-size:13px;
+    color:#777;
+    margin-bottom:14px;
+}
+
+.status-montagem{
+    display:none;
+    background:#fff3e0;
+    border:2px dashed #ff9800;
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:16px;
+}
+
+.status-montagem p{
+    font-weight:600;
+    color:#b45f00;
+    margin-bottom:4px;
+}
+
+.status-montagem small{
+    color:#b45f00;
+}
+
+/* NOVO: lista de pizzas já adicionadas no Passo 1 */
+
+.lista-pizzas-adicionadas{
+    display:none;
+    margin-bottom:10px;
+}
+
+.titulo-pizzas-adicionadas{
+    color:#25D366;
+    font-size:16px;
+    margin-bottom:10px;
+}
+
+.pizza-adicionada{
+    background:white;
+    border:2px solid #25D366;
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.btn-remover-pizza{
+    background:#fff0f0;
+    color:#d32f2f;
+    border:1px solid #d32f2f;
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:14px;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+/* ===== NOVO: tela "Pedido enviado" (Passo pós-checkout) ===== */
+
+.pedido-enviado{
+    min-height:80vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:20px;
+}
+
+.check-enviado{
+    font-size:80px;
+    margin-bottom:10px;
+}
+
+.pedido-enviado h2{
+    font-size:28px;
+}
+
+.pedido-enviado p{
+    color:#666;
+    margin-bottom:30px;
+    max-width:340px;
+}
+
+.pedido-enviado .continuar{
+    max-width:340px;
 }
