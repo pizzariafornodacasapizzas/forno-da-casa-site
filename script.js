@@ -3,6 +3,8 @@ const URL_PLANILHA =
 
 const whatsapp = "5531971268087";
 
+const CHAVE_RASCUNHO = "fornoDaCasaPedidoRascunho";
+
 const fretes = {
 
  "Mata grande": 0,
@@ -43,9 +45,6 @@ const fretes = {
 "Piedade": 0,
 "Aeroporto Industrial": 10,
 "Jardim Universitário": 3,
-
-
-
 
 };
 
@@ -136,15 +135,6 @@ imagem:"imagens/lombinhocheddar.jpg",
 imagem:"imagens/marguerita.jpg",
  descricao:"Molho, muçarela, manjericão, tomate, azeitona e orégano"
 },
-/*
-{
- name:"Palmito",
- preco:64.90,
- precoBroto:39.90,
-imagem:"imagens/palmito.jpg",
- descricao:"Molho, muçarela, palmito, pimentão, cebola, tomate, azeitona e orégano"
-}
-*/
 ];
 
 const bebidas = [
@@ -160,6 +150,47 @@ let pedido = {
  frete:0,
  total:0
 };
+
+/* controla a montagem da pizza família (sempre 2 sabores, podem repetir) */
+let selecaoFamilia = [];
+
+/* controla se o carrinho flutuante está expandido ou recolhido */
+let carrinhoAberto = false;
+
+/* ===== INDICADOR DE PROGRESSO (5 passos, Passo 0 = home não conta) ===== */
+const mapaProgresso = {
+ 2: 1,   // Passo 1: Monte sua pizza
+ 4: 2,   // Passo 2: Borda de cada pizza + Bebida
+ 7: 3,   // Passo 3: Confirmação
+ 8: 4,   // Passo 4: Entrega
+ 9: 5    // Passo 5: Finalizar
+};
+const totalPassos = 5;
+
+function atualizarProgresso(passo){
+
+ const container = document.getElementById("progresso");
+ const texto = container ? container.querySelector(".progresso-texto") : null;
+ const fill = document.getElementById("progressoFill");
+
+ if(!container) return;
+
+ if(!passo){
+  container.style.display = "none";
+  return;
+ }
+
+ container.style.display = "block";
+
+ if(texto){
+  texto.innerHTML = `Passo ${passo} de ${totalPassos}`;
+ }
+
+ if(fill){
+  fill.style.width = ((passo/totalPassos)*100) + "%";
+ }
+
+}
 
 function mostrarEtapa(numero){
 
@@ -179,6 +210,24 @@ function mostrarEtapa(numero){
  }else{
 
   etapa.style.display = "block";
+
+ }
+
+ atualizarProgresso(mapaProgresso[numero] || null);
+
+ if(numero === 2){
+
+  renderizarPizzasAdicionadas();
+  atualizarBotaoContinuarPasso1();
+
+ }else{
+
+  const btnContinuarPasso1 =
+  document.getElementById("btnContinuarPasso1");
+
+  if(btnContinuarPasso1){
+   btnContinuarPasso1.style.display = "none";
+  }
 
  }
 
@@ -202,59 +251,48 @@ function mostrarEtapa(numero){
  window.scrollTo(0,0);
 
 }
-function mostrarEtapaCustom(id){
 
- document.querySelectorAll(".tela").forEach(tela=>{
-  tela.style.display="none";
- });
+/* ===== PASSO 1: monta as listas de sabores (família e broto) ===== */
+function popularSabores(){
 
- document.getElementById(id).style.display="block";
+ const listaFamilia =
+ document.getElementById("listaSaboresFamilia");
+
+ const listaBroto =
+ document.getElementById("listaSaboresBroto");
+
+ if(listaFamilia){
+
+  listaFamilia.innerHTML = "";
+
+  pizzas.forEach((pizza,index)=>{
+
+   listaFamilia.innerHTML +=
+   itemSaborFamiliaHtml(pizza, index);
+
+  });
+
+ }
+
+ if(listaBroto){
+
+  listaBroto.innerHTML = "";
+
+  pizzas.forEach((pizza,index)=>{
+
+   listaBroto.innerHTML +=
+   itemSaborBrotoHtml(pizza, index);
+
+  });
+
+ }
 
 }
 
-function selecionarTipo(tipo){
+function itemSaborFamiliaHtml(pizza, index){
 
- if(tipo === "familia"){
-
-  tamanhoAtual = "familia";
-  mostrarEtapaInteira();
-
- }
-
- else if(tipo === "broto"){
-
-  tamanhoAtual = "broto";
-  mostrarEtapaInteira();
-
- }
-
- else if(tipo === "meio"){
-
-  tamanhoAtual = "familia";
-  mostrarEtapaMeio();
-
- }
-
-}
-
-function mostrarEtapaInteira(){
-
- mostrarEtapaCustom("etapa3Inteira");
-
- const lista =
- document.getElementById("listaSaboresInteira");
-
- lista.innerHTML="";
-
- pizzas.forEach(pizza=>{
-
-const preco =
- tamanhoAtual === "broto"
- ? pizza.precoBroto
- : pizza.preco;
-
-  lista.innerHTML += `
-  <div class="sabor">
+ return `
+  <div class="sabor" id="saborFamilia${index}">
 
 <img
         src="${pizza.imagem || ''}"
@@ -271,125 +309,361 @@ const preco =
     </p>
 
     <span class="preco">
-        R$ ${preco.toFixed(2)}
+        R$ ${pizza.preco.toFixed(2)}
     </span>
 
 </div>
 
-<button onclick="escolherPizza('${pizza.name}',${preco})">
+<button onclick="selecionarSaborFamilia('${pizza.name}',${pizza.preco},${index})">
     +
 </button>
 
 </div>
 `;
 
-});
+}
+
+function itemSaborBrotoHtml(pizza, index){
+
+ return `
+  <div class="sabor" id="saborBroto${index}">
+
+<img
+        src="${pizza.imagem || ''}"
+        alt="${pizza.name}"
+        class="foto-pizza"
+    >
+
+   <div>
+
+    <strong>${pizza.name}</strong>
+
+    <p class="descricao-pizza">
+        ${pizza.descricao}
+    </p>
+
+    <span class="preco">
+        R$ ${pizza.precoBroto.toFixed(2)}
+    </span>
+
+</div>
+
+<button onclick="escolherPizzaBroto('${pizza.name}',${pizza.precoBroto})">
+    +
+</button>
+
+</div>
+`;
 
 }
 
-function mostrarEtapaMeio(){
+/* seleção de sabor da família (sempre 2 escolhas, podem repetir) */
+function selecionarSaborFamilia(nome,preco,index){
 
- mostrarEtapaCustom("etapa3Meio");
+ selecaoFamilia.push({nome:nome, preco:preco, index:index});
 
- const sabor1 =
- document.getElementById("sabor1");
+ const item =
+ document.getElementById("saborFamilia" + index);
 
- const sabor2 =
- document.getElementById("sabor2");
+ if(item){
+  item.classList.add("selecionado-sabor");
+ }
 
- sabor1.innerHTML="";
- sabor2.innerHTML="";
+ atualizarStatusMontagemFamilia();
 
- pizzas.forEach(pizza=>{
+ if(selecaoFamilia.length >= 2){
+  finalizarPizzaFamilia();
+ }
 
-  sabor1.innerHTML +=
-  `<option>${pizza.name}</option>`;
+}
 
-  sabor2.innerHTML +=
-  `<option>${pizza.name}</option>`;
+function atualizarStatusMontagemFamilia(){
+
+ const status =
+ document.getElementById("statusMontagemFamilia");
+
+ if(!status) return;
+
+ if(selecaoFamilia.length === 0){
+
+  status.style.display = "none";
+  status.innerHTML = "";
+
+  return;
+
+ }
+
+ let html = "";
+
+ selecaoFamilia.forEach(item=>{
+
+  html += `<p>🍕 1/2 ${item.nome}</p>`;
 
  });
 
+ if(selecaoFamilia.length === 1){
+
+  html += `<small>Escolha o 2º sabor (pode repetir o mesmo)</small>`;
+
+ }
+
+ status.style.display = "block";
+ status.innerHTML = html;
+
 }
 
-function escolherPizza(nome,preco){
+function finalizarPizzaFamilia(){
+
+ const m1 = selecaoFamilia[0];
+ const m2 = selecaoFamilia[1];
+
+ const sabor =
+ m1.nome === m2.nome
+ ? m1.nome
+ : `1/2 ${m1.nome} + 1/2 ${m2.nome}`;
+
+ const preco = (m1.preco + m2.preco) / 2;
+
+ pedido.pizzas.push({
+  sabor:sabor,
+  preco:preco,
+  tamanho:"familia",
+  borda:false,
+  tipoBorda:"",
+  precoBorda:0
+ });
+
+ limparMontagemFamilia();
+
+ renderizarPizzasAdicionadas();
+ atualizarCarrinhoFlutuante();
+ atualizarBotaoContinuarPasso1();
+
+}
+
+function limparMontagemFamilia(){
+
+ selecaoFamilia.forEach(item=>{
+
+  const el =
+  document.getElementById("saborFamilia" + item.index);
+
+  if(el){
+   el.classList.remove("selecionado-sabor");
+  }
+
+ });
+
+ selecaoFamilia = [];
+
+ atualizarStatusMontagemFamilia();
+
+}
+
+function escolherPizzaBroto(nome,preco){
 
  pedido.pizzas.push({
     sabor:nome,
     preco:preco,
-    tamanho:tamanhoAtual,
+    tamanho:"broto",
     borda:false,
     tipoBorda:"",
     precoBorda:0
 });
 
- mostrarEtapa(4);
-
-atualizarValorBorda();
+ renderizarPizzasAdicionadas();
+ atualizarCarrinhoFlutuante();
+ atualizarBotaoContinuarPasso1();
 
 }
 
-function confirmarMeioMeio(){
+/* ===== NOVO: lista as pizzas já adicionadas no Passo 1, com opção de remover ===== */
+function renderizarPizzasAdicionadas(){
 
- const s1 =
- document.getElementById("sabor1").value;
+ const container =
+ document.getElementById("listaPizzasAdicionadas");
 
- const s2 =
- document.getElementById("sabor2").value;
+ if(!container) return;
 
- if(s1===s2){
+ if(pedido.pizzas.length === 0){
 
-  alert("Escolha dois sabores diferentes.");
+  container.style.display = "none";
+  container.innerHTML = "";
+
   return;
 
  }
 
- const p1 =
- pizzas.find(p=>p.name===s1);
+ container.style.display = "block";
 
- const p2 =
- pizzas.find(p=>p.name===s2);
+ let html = `<h3 class="titulo-pizzas-adicionadas">Pizzas no seu pedido (${pedido.pizzas.length})</h3>`;
 
- pedido.pizzas.push({
- sabor:`Meio a Meio: ${s1} / ${s2}`,
- preco:(p1.preco + p2.preco)/2,
- borda:false,
- tipoBorda:"",
- precoBorda:0
-});
+ pedido.pizzas.forEach((pizza,i)=>{
 
+  html += `
+   <div class="pizza-adicionada">
+
+    <div>
+     <strong>Pizza ${i+1}:</strong> ${pizza.sabor}<br>
+     <span class="preco">R$ ${pizza.preco.toFixed(2)}</span>
+    </div>
+
+    <button class="btn-remover-pizza" onclick="removerPizza(${i})">
+     🗑 Remover
+    </button>
+
+   </div>
+  `;
+
+ });
+
+ container.innerHTML = html;
+
+}
+
+/* ===== NOVO: remove uma pizza já adicionada ===== */
+function removerPizza(indice){
+
+ pedido.pizzas.splice(indice,1);
+
+ renderizarPizzasAdicionadas();
  atualizarCarrinhoFlutuante();
+ atualizarBotaoContinuarPasso1();
 
-atualizarValorBorda();
+}
+
+/* mostra/esconde o botão "Continuar" fixo do Passo 1 conforme houver pizza no pedido */
+function atualizarBotaoContinuarPasso1(){
+
+ const btn =
+ document.getElementById("btnContinuarPasso1");
+
+ if(!btn) return;
+
+ btn.style.display =
+ pedido.pizzas.length > 0 ? "block" : "none";
+
+}
+
+/* ===== PASSO 1 -> PASSO 2 ===== */
+function irParaBordas(){
+
+ renderizarBordasPizzas();
+ carregarBebidas();
 
  mostrarEtapa(4);
 
 }
 
-function selecionarBorda(tipo){
+/* ===== PASSO 2: borda individual de cada pizza do pedido ===== */
+function renderizarBordasPizzas(){
 
-    let ultimaPizza = pedido.pizzas[pedido.pizzas.length-1];
+ const container =
+ document.getElementById("listaBordasPizzas");
 
-    if(tipo === false){
+ if(!container) return;
 
-        ultimaPizza.borda = false;
-        ultimaPizza.tipoBorda = "";
-        ultimaPizza.precoBorda = 0;
+ container.innerHTML = "";
 
-    }else{
+ pedido.pizzas.forEach((pizza,i)=>{
 
-        ultimaPizza.borda = true;
-        ultimaPizza.tipoBorda = tipo;
+  const acrescimo =
+  pizza.tamanho === "broto" ? "7,90" : "11,90";
 
-        ultimaPizza.precoBorda =
-            ultimaPizza.tamanho === "broto"
-            ? 7.90
-            : 11.90;
-    }
+  container.innerHTML += `
+   <div class="card-pizza-borda">
 
-    atualizarCarrinhoFlutuante();
-    carregarBebidas();
-    mostrarEtapa(5);
+    <h3>Pizza ${i+1}: ${pizza.sabor}</h3>
+    <small class="tamanho-pizza-borda">
+     ${pizza.tamanho === "broto" ? "Broto - 4 pedaços" : "Família - 8 pedaços"}
+    </small>
+
+    <div class="opcoes-borda-pizza">
+
+     <button
+      id="btnBorda${i}Tradicional"
+      class="opcao opcao-pequena${pizza.borda === false ? " selecionado" : ""}"
+      onclick="selecionarBordaPizza(${i}, false)">
+      Tradicional
+     </button>
+
+     <button
+      id="btnBorda${i}Catupiry"
+      class="opcao opcao-pequena${pizza.tipoBorda === "catupiry" ? " selecionado" : ""}"
+      onclick="selecionarBordaPizza(${i}, 'catupiry')">
+      Catupiry
+      <br><small>Acréscimo: R$ ${acrescimo}</small>
+     </button>
+
+     <button
+      id="btnBorda${i}Cheddar"
+      class="opcao opcao-pequena${pizza.tipoBorda === "cheddar" ? " selecionado" : ""}"
+      onclick="selecionarBordaPizza(${i}, 'cheddar')">
+      Cheddar
+      <br><small>Acréscimo: R$ ${acrescimo}</small>
+     </button>
+
+    </div>
+
+   </div>
+  `;
+
+ });
+
+}
+
+function selecionarBordaPizza(indice, tipo){
+
+ const pizza = pedido.pizzas[indice];
+
+ if(!pizza) return;
+
+ if(tipo === false){
+
+  pizza.borda = false;
+  pizza.tipoBorda = "";
+  pizza.precoBorda = 0;
+
+ }else{
+
+  pizza.borda = true;
+  pizza.tipoBorda = tipo;
+
+  pizza.precoBorda =
+   pizza.tamanho === "broto"
+   ? 7.90
+   : 11.90;
+
+ }
+
+ /* destaque visual só dentro do grupo de botões dessa pizza */
+ ["Tradicional","Catupiry","Cheddar"].forEach(nomeBtn=>{
+
+  const btn =
+  document.getElementById("btnBorda" + indice + nomeBtn);
+
+  if(btn){
+   btn.classList.remove("selecionado");
+  }
+
+ });
+
+ const idSelecionado =
+  tipo === false
+  ? "Tradicional"
+  : tipo === "catupiry"
+  ? "Catupiry"
+  : "Cheddar";
+
+ const btnSelecionado =
+ document.getElementById("btnBorda" + indice + idSelecionado);
+
+ if(btnSelecionado){
+  btnSelecionado.classList.add("selecionado");
+ }
+
+ atualizarCarrinhoFlutuante();
+
 }
 
 function carregarBebidas(){
@@ -521,6 +795,97 @@ function totalPizzas(){
 
 }
 
+/* ===== NOVO: salvar/carregar/limpar rascunho do pedido no navegador ===== */
+function salvarRascunho(){
+
+ try{
+
+  localStorage.setItem(
+   CHAVE_RASCUNHO,
+   JSON.stringify(pedido)
+  );
+
+ }catch(e){
+
+  console.error("Não foi possível salvar o rascunho:", e);
+
+ }
+
+}
+
+function limparRascunho(){
+
+ try{
+  localStorage.removeItem(CHAVE_RASCUNHO);
+ }catch(e){
+  console.error(e);
+ }
+
+}
+
+function carregarRascunho(){
+
+ try{
+
+  const salvo = localStorage.getItem(CHAVE_RASCUNHO);
+
+  if(!salvo) return;
+
+  const dados = JSON.parse(salvo);
+
+  if(!dados || !dados.pizzas || dados.pizzas.length === 0){
+   return;
+  }
+
+  const continuar = confirm(
+   "Você tem um pedido em andamento salvo. Deseja continuar de onde parou?"
+  );
+
+  if(continuar){
+
+   pedido = dados;
+
+   mostrarEtapa(2);
+
+  }else{
+
+   limparRascunho();
+
+  }
+
+ }catch(e){
+
+  console.error("Não foi possível carregar o rascunho:", e);
+
+ }
+
+}
+
+function alternarCarrinhoFlutuante(){
+
+ carrinhoAberto = !carrinhoAberto;
+ aplicarEstadoCarrinho();
+
+}
+
+function aplicarEstadoCarrinho(){
+
+ const expandido =
+ document.getElementById("carrinhoExpandido");
+
+ const seta =
+ document.querySelector(".seta-carrinho");
+
+ if(expandido){
+  expandido.style.display = carrinhoAberto ? "block" : "none";
+ }
+
+ if(seta){
+  seta.textContent = carrinhoAberto ? "▼" : "▲";
+ }
+
+}
+
 function atualizarCarrinhoFlutuante(){
 
  const carrinho =
@@ -535,23 +900,44 @@ function atualizarCarrinhoFlutuante(){
  if(subtotal <= 0){
 
   carrinho.style.display = "none";
+  carrinhoAberto = false;
+  limparRascunho();
   return;
 
  }
 
- carrinho.style.display = "flex";
+ carrinho.style.display = "block";
 
+ let qtdBebidas = 0;
+
+ pedido.bebidas.forEach(item=>{
+  qtdBebidas += item.qtd;
+ });
+
+ const totalItens =
+ pedido.pizzas.length + qtdBebidas;
+
+ /* resumo compacto (sempre visível) */
+ document.getElementById("resumoCompacto").innerHTML =
+ `🍕 ${totalItens} ${totalItens === 1 ? "item" : "itens"}`;
+
+ document.getElementById("totalCompacto").innerHTML =
+ "R$ " + subtotal.toFixed(2);
+
+ /* resumo expandido (só aparece ao tocar) */
  let resumo = "";
 
-resumo += `🍕 ${pedido.pizzas.length} Pizza(s)`;
+ pedido.pizzas.forEach(pizza=>{
 
-let qtdBebidas = 0;
+  resumo += `🍕 ${pizza.sabor}<br>`;
 
-pedido.bebidas.forEach(item=>{
- qtdBebidas += item.qtd;
-});
+ });
 
-resumo += `<br>🥤 ${qtdBebidas} Bebida(s)`;
+ if(qtdBebidas > 0){
+  resumo += `🥤 ${qtdBebidas} Bebida(s)`;
+ }else{
+  resumo = resumo.replace(/<br>$/, "");
+ }
 
  document.getElementById("resumoFlutuante")
  .innerHTML = resumo;
@@ -560,86 +946,12 @@ resumo += `<br>🥤 ${qtdBebidas} Bebida(s)`;
  .innerHTML =
  "R$ " + subtotal.toFixed(2);
 
-}
+ aplicarEstadoCarrinho();
 
-function mostrarCarrinho(){
-
- let pizzasTexto = "";
- let subtotalPizzas = 0;
-
- pedido.pizzas.forEach((pizza,index)=>{
-
-  subtotalPizzas += pizza.preco;
-
-  if(pizza.borda){
-   subtotalPizzas += pizza.precoBorda;
-  }
-
-  pizzasTexto += `
-<p>
- <strong>Pizza ${index + 1}:</strong><br>
-
- ${pizza.sabor}<br>
-
- <small>
- ${pizza.tamanho === "broto"
- ? "🍕 Broto - 4 pedaços"
- : "🍕 Família - 8 pedaços"}
- </small>
-
- ${pizza.borda
-? `<br>Borda ${
-    pizza.tipoBorda === "cheddar"
-        ? "Cheddar"
-        : "Catupiry"
-}`
-: ""}
-</p>
-`;
-
- });
-
- let bebidasTexto = "";
- let subtotalBebidas = 0;
-
- pedido.bebidas.forEach(item=>{
-
-  bebidasTexto += `
-  ${item.nome} (${item.qtd}x)<br>
-  `;
-
-  subtotalBebidas += item.preco * item.qtd;
-
- });
-
- if(bebidasTexto === ""){
-  bebidasTexto = "Nenhuma";
- }
-
- const subtotal =
- subtotalPizzas + subtotalBebidas;
-
- document.getElementById("resumoPedido")
- .innerHTML = `
-
- ${pizzasTexto}
-
- <p>
- <strong>Bebidas:</strong><br>
- ${bebidasTexto}
- </p>
-
- <hr>
-
- <h3>
- Subtotal: R$ ${subtotal.toFixed(2)}
- </h3>
-
- `;
-
- mostrarEtapa(6);
+ salvarRascunho();
 
 }
+
 function normalizarTexto(texto) {
   return texto
     .toLowerCase()
@@ -648,7 +960,79 @@ function normalizarTexto(texto) {
     .trim();
 }
 
+/* ===== NOVO: máscara de telefone (XX) XXXXX-XXXX ===== */
+function mascararTelefone(input){
+
+ let v = input.value.replace(/\D/g,"");
+
+ v = v.slice(0,11);
+
+ if(v.length === 0){
+  input.value = "";
+  return;
+ }
+
+ if(v.length <= 2){
+
+  input.value = "(" + v;
+
+ }else if(v.length <= 6){
+
+  input.value =
+  "(" + v.slice(0,2) + ") " + v.slice(2);
+
+ }else if(v.length <= 10){
+
+  input.value =
+  "(" + v.slice(0,2) + ") " + v.slice(2,6) + "-" + v.slice(6);
+
+ }else{
+
+  input.value =
+  "(" + v.slice(0,2) + ") " + v.slice(2,7) + "-" + v.slice(7);
+
+ }
+
+}
+
+/* ===== NOVO: validação dos campos obrigatórios de entrega ===== */
+function validarCamposEntrega(){
+
+ let valido = true;
+
+ const camposObrigatorios = ["nome","telefone","bairro"];
+
+ camposObrigatorios.forEach(id=>{
+
+  const el = document.getElementById(id);
+
+  if(!el) return;
+
+  if(!el.value.trim()){
+
+   el.classList.add("campo-erro");
+   valido = false;
+
+  }else{
+
+   el.classList.remove("campo-erro");
+
+  }
+
+ });
+
+ return valido;
+
+}
+
 function calcularFrete(){
+
+if(!validarCamposEntrega()){
+
+ alert("Preencha nome, telefone e bairro para continuar.");
+ return;
+
+}
 
 const bairro = normalizarTexto(
  document.getElementById("bairro").value
@@ -858,6 +1242,29 @@ window.open(
  "_blank"
  );
 
+limparRascunho();
+
+mostrarEtapa(10);
+
+}
+
+/* ===== NOVO: reseta tudo e volta pra Home depois do pedido enviado ===== */
+function fazerNovoPedido(){
+
+ pedido = {
+  pizzas:[],
+  bebidas:[],
+  frete:0,
+  total:0
+ };
+
+ limparMontagemFamilia();
+ renderizarPizzasAdicionadas();
+ atualizarBotaoContinuarPasso1();
+ atualizarCarrinhoFlutuante();
+
+ mostrarEtapa(1);
+
 }
 
 function mostrarConfirmacao(){
@@ -948,7 +1355,12 @@ function reiniciarPedido(){
   total:0
  };
 
+ limparMontagemFamilia();
+ renderizarPizzasAdicionadas();
+ atualizarBotaoContinuarPasso1();
+
  atualizarCarrinhoFlutuante();
+ limparRascunho();
 
  mostrarEtapa(2);
 
@@ -1100,7 +1512,10 @@ function atualizarStatusLoja(){
 }
 
 atualizarStatusLoja();
+popularSabores();
 mostrarEtapa(1);
+carregarRascunho();
+
 function distanciaTexto(a, b) {
 
   a = normalizarTexto(a);
@@ -1166,15 +1581,4 @@ function encontrarBairroMaisProximo(textoDigitado){
   }
 
   return null;
-}
-function atualizarValorBorda(){
-
-    const valor =
-        tamanhoAtual === "broto"
-        ? "Acréscimo: R$ 7,90"
-        : "Acréscimo: R$ 11,90";
-
-    document.getElementById("valorBordaCatupiry").innerHTML = valor;
-    document.getElementById("valorBordaCheddar").innerHTML = valor;
-
 }
