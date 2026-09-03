@@ -14,36 +14,7 @@
 
 <body>
 
-<!--AVISO DE RECESSO -->
-
-<!--
-<div id="avisoFerias" class="aviso-ferias">
-    <div class="aviso-conteudo">
-
-        <img src="logo.jpeg" alt="Forno da Casa" class="logo-ferias">
-
-        
-        <h2>🍕 ESTAMOS EM UMA BREVE PAUSA</h2>
-
-        <p>
-            Entre os dias <strong>14/08 e 18/08</strong>,
-            estaremos fechados para um período de descanso e melhorias.
-        </p>
-
-        <p>
-            Em breve estaremos de volta preparando suas pizzas favoritas com todo o carinho de sempre.
-</p>
-
-        <p>
-
- Agradecemos sua preferência e compreensão.❤️
-        </p>
-
-    </div>
-</div>
--->
-
-<!-- ETAPA 1 -->
+<!-- ETAPA 1 = PASSO 0 (Home) -->
 
 <section id="etapa1" class="tela home">
 
@@ -73,139 +44,60 @@ Carregando...
 
 </section>
 
-<!-- ETAPA 2 -->
+<!-- INDICADOR DE PROGRESSO -->
+<div id="progresso" class="progresso">
+  <div class="progresso-texto"></div>
+  <div class="progresso-barra">
+    <div id="progressoFill" class="progresso-fill"></div>
+  </div>
+</div>
+
+<!-- ETAPA 2 = PASSO 1: Monte sua pizza -->
 
 <section id="etapa2" class="tela">
 
-<h2>Como deseja montar sua pizza?</h2>
+<h2>Monte sua pizza</h2>
 
-<div class="opcoes">
+<div id="listaPizzasAdicionadas" class="lista-pizzas-adicionadas"></div>
 
-<button class="opcao" onclick="selecionarTipo('familia')">
-🍕 Pizza Inteira Família - 8 Pedaços - 35cm
-</button>
+<h3 class="titulo-tipo">🍕 Pizza Família - 8 Pedaços - 35cm</h3>
+<p class="instrucao-sabor">Selecione os sabores (escolha 2 — pode repetir o mesmo)</p>
 
-<button class="opcao" onclick="selecionarTipo('meio')">
-🍕🍕 Pizza Dois Sabores Família - 8 Pedaços - 35cm
-</button>
+<div id="statusMontagemFamilia" class="status-montagem"></div>
 
-<button class="opcao" onclick="selecionarTipo('broto')">
-🍕 Pizza Inteira Broto - 4 Pedaços - 25cm
-</button>
+<div id="listaSaboresFamilia"></div>
 
-</div>
+<h3 class="titulo-tipo">🍕 Pizza Broto - 4 Pedaços - 25cm</h3>
+<p class="instrucao-sabor">Não temos opção de dois sabores no broto — escolha 1 sabor</p>
+
+<div id="listaSaboresBroto"></div>
 
 </section>
 
-<!-- ETAPA 3A -->
-
-<section id="etapa3Inteira" class="tela">
-
-<h2>Escolha o sabor</h2>
-
-<div id="listaSaboresInteira"></div>
-<button class="continuar" onclick="mostrarEtapa(2)">
-⬅ Voltar 
+<!-- BOTÃO CONTINUAR FIXO (Passo 1) - aparece imediato, sem precisar rolar -->
+<button id="btnContinuarPasso1" class="btn-continuar-fixo" onclick="irParaBordas()">
+Continuar ➡
 </button>
 
-</section>
-
-<!-- ETAPA 3B -->
-
-<section id="etapa3Meio" class="tela">
-
-<h2>Pizza Dois Sabores</h2>
-
-<label>Primeiro sabor</label>
-<select id="sabor1"></select>
-
-<label>Segundo sabor</label>
-<select id="sabor2"></select>
-
-<button class="continuar btn-verde" onclick="confirmarMeioMeio()">
-Continuar
-</button>
-<button class="continuar" onclick="mostrarEtapa(2)">
-⬅ Voltar
-</button>
-
-</section>
-
-<!-- ETAPA 4 -->
+<!-- ETAPA 4 = PASSO 2: Borda de cada pizza + Bebida -->
 
 <section id="etapa4" class="tela">
 
-    <h2>Deseja adicionar borda?</h2>
+    <h2>Escolha a borda de cada pizza</h2>
 
-    <div class="opcoes">
+    <div id="listaBordasPizzas"></div>
 
-        <button class="opcao" onclick="selecionarBorda(false)">
-            Borda Tradicional
-        </button>
+    <h2 class="titulo-bebida">Deseja adicionar bebida?</h2>
 
-        <button
-            class="opcao"
-            onclick="selecionarBorda('catupiry')"
-        >
-            Borda de Catupiry
-            <br>
-            <small id="valorBordaCatupiry">
-                Acréscimo: R$ 11,90
-            </small>
-        </button>
+    <div id="listaBebidas"></div>
 
-        <button
-            class="opcao"
-            onclick="selecionarBorda('cheddar')"
-        >
-            Borda de Cheddar
-            <br>
-            <small id="valorBordaCheddar">
-                Acréscimo: R$ 11,90
-            </small>
-        </button>
-
-    </div>
+    <button class="continuar" onclick="mostrarConfirmacao()">
+    Continuar
+    </button>
 
 </section>
 
-<!-- ETAPA 5 -->
-
-<section id="etapa5" class="tela">
-
-<h2>Deseja adicionar bebida?</h2>
-
-<div id="listaBebidas"></div>
-
-<button class="continuar" onclick="mostrarCarrinho()">
-Continuar
-</button>
-
-</section>
-
-<!-- ETAPA 6 -->
-
-<section id="etapa6" class="tela">
-
-<h2>Seu Pedido</h2>
-
-<div id="resumoPedido"></div>
-
-<div class="botoes">
-
-<button onclick="mostrarEtapa(2)">
-➕ Adicionar Outra Pizza
-</button>
-
-<button onclick="mostrarConfirmacao()">
-Continuar
-</button>
-
-</div>
-
-</section>
-
-
+<!-- ETAPA 7 = PASSO 3: Confirmação -->
 
 <section id="etapa7" class="tela">
 
@@ -227,9 +119,7 @@ Continuar
 
 </section>
 
-
-
-<!-- ETAPA 8 -->
+<!-- ETAPA 8 = PASSO 4: Entrega -->
 
 <section id="etapa8" class="tela">
 
@@ -237,7 +127,7 @@ Continuar
 
 <input type="text" id="nome" placeholder="Nome">
 
-<input type="text" id="telefone" placeholder="Telefone">
+<input type="text" id="telefone" placeholder="Telefone" oninput="mascararTelefone(this)" maxlength="15">
 
 <input type="text" id="rua" placeholder="Rua">
 
@@ -271,7 +161,7 @@ Confirmar Dados
 
 </section>
 
-<!-- ETAPA 9 -->
+<!-- ETAPA 9 = PASSO 5: Finalizar -->
 
 <section id="etapa9" class="tela">
 
@@ -285,11 +175,37 @@ e Solicitar Valor do Frete
 </button>
 </section>
 
+<!-- ETAPA 10: Pedido enviado (pós-checkout) -->
+
+<section id="etapa10" class="tela">
+
+<div class="pedido-enviado">
+
+<div class="check-enviado">✅</div>
+
+<h2>Pedido enviado!</h2>
+
+<p>Seu pedido foi enviado pelo WhatsApp. Fique de olho no chat pra confirmar com a gente.</p>
+
+<button class="continuar btn-verde" onclick="fazerNovoPedido()">
+🍕 Fazer novo pedido
+</button>
+
+</div>
+
+</section>
+
 <!-- CARRINHO FLUTUANTE -->
 
-<div id="carrinhoFlutuante" class="carrinho-flutuante">
+<div id="carrinhoFlutuante" class="carrinho-flutuante" onclick="alternarCarrinhoFlutuante()">
 
-    <div class="carrinho-info">
+    <div id="carrinhoResumido" class="carrinho-resumido">
+        <span id="resumoCompacto">🍕 0 itens</span>
+        <span id="totalCompacto">R$ 0,00</span>
+        <span class="seta-carrinho">▲</span>
+    </div>
+
+    <div id="carrinhoExpandido" class="carrinho-expandido">
 
         <div id="resumoFlutuante">
             Nenhum item selecionado
