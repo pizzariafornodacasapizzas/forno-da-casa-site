@@ -12,6 +12,7 @@ const fretes = {
 "Vale das Palmeiras": 0,
 "Iporanga": 0,
 "Iporanga 2": 0,
+"Manoa": 12,
 "São Cristóvão": 0,
 "Santo Antônio": 0,
 "Santa Rosa": 0,
@@ -1576,7 +1577,19 @@ function encontrarBairroMaisProximo(textoDigitado){
 
   });
 
-  if(menorDistancia <= 3){
+  if(!melhorBairro){
+    return null;
+  }
+
+  /* CORREÇÃO: tolerância proporcional ao tamanho do nome do bairro.
+     Antes era um número fixo (3), grande demais pra nomes curtos —
+     isso fazia bairros bem diferentes (ex: "Manoa" e "Canaã", distância 2)
+     serem confundidos um com o outro. Agora nomes curtos toleram só
+     1 letra de diferença; nomes longos continuam tolerando até 3. */
+  const toleranciaMaxima =
+    Math.min(3, Math.max(1, Math.floor(melhorBairro.length * 0.25)));
+
+  if(menorDistancia <= toleranciaMaxima){
     return melhorBairro;
   }
 
