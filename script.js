@@ -27,7 +27,7 @@ const fretes = {
 "Colorado": 3,
 "Flórida": 0,
 "São Geraldo": 0,
-"Dona Dora": 0,
+"Dona Dora": 5,
 "Progresso": 5,
 "Morro do Claro": 5,
 "Bairro das Indústrias": 7,
