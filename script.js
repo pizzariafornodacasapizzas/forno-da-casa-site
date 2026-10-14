@@ -12,7 +12,6 @@ const fretes = {
 "Vale das Palmeiras": 0,
 "Iporanga": 0,
 "Iporanga 2": 0,
-"Manoa": 12,
 "São Cristóvão": 0,
 "Santo Antônio": 0,
 "Santa Rosa": 0,
@@ -81,6 +80,13 @@ imagem:"imagens/calabresa.jpg",
  descricao:"Molho, muçarela, calabresa, cebola, azeitona e orégano"
 },
 {
+ name:"Calabresa Cremosa",
+ preco:64.90,
+ precoBroto:44.90,
+imagem:"imagens/calabresacremosa.jpg",
+ descricao:"Molho, muçarela, calabresa,catupiri, cebola, azeitona e orégano"
+},
+{
  name:"Mussarela",
  preco:54.90,
  precoBroto:34.90,
@@ -102,6 +108,20 @@ imagem:"imagens/frangocatupiry.jpg",
  descricao:"Molho, muçarela, frango, catupiry, azeitona e orégano"
 },
 {
+ name:"Frango com Bacon",
+ preco:59.90,
+ precoBroto:41.90,
+imagem:"imagens/frangobacon.jpg",
+ descricao:"Molho, muçarela, frango, bacon, azeitona e orégano"
+},
+{
+ name:"Frango",
+ preco:54.90,
+ precoBroto:37.90,
+imagem:"imagens/frango.jpg",
+ descricao:"Molho, muçarela, frango, azeitona e orégano"
+},
+{
  name:"4 Queijos",
  preco:64.90,
  precoBroto:39.90,
@@ -114,6 +134,20 @@ imagem:"imagens/4queijos.jpg",
  precoBroto:39.90,
 imagem:"imagens/caipira.jpg",
  descricao:"Molho, muçarela, frango, bacon, milho, cebola, azeitona e orégano"
+},
+{
+ name:"Milho e Bacon",
+ preco:54.90,
+ precoBroto:37.90,
+imagem:"imagens/Milhobacon.jpg",
+ descricao:"Molho, muçarela, bacon, milho, azeitona e orégano"
+},
+{
+ name:"Milho",
+ preco:49.90,
+ precoBroto:34.90,
+imagem:"imagens/Milho.jpg",
+ descricao:"Molho, muçarela, milho, azeitona e orégano"
 },
 {
  name:"Lombinho",
@@ -139,10 +173,11 @@ imagem:"imagens/marguerita.jpg",
 ];
 
 const bebidas = [
- {name:"Coca-Cola 2L",preco:13.90},
- {name:"Coca-Cola Zero 2L",preco:13.90},
+ {name:"Coca-Cola 2L",preco:14.90},
+ {name:"Coca-Cola Zero 2L",preco:14.90},
  {name:"Guaraná Antarctica 2L",preco:12.90},
-{name:"Mate Couro 1L",preco:7.90}
+{name:"Mate Couro 1L",preco:7.90},
+{name:"Guarana Antarctica 1L",preco:7.90}
 ];
 
 let pedido = {
