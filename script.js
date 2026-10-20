@@ -228,6 +228,172 @@ function atualizarProgresso(passo){
 
 }
 
+/* ===== PROMOÇÃO DO DIA =====
+   0=Domingo 1=Segunda 2=Terça 3=Quarta 4=Quinta 5=Sexta 6=Sábado
+   Dia sem promoção = null (o banner some e nada é aplicado) */
+
+/* MODO TESTE: enquanto estiver 2, o site age como se fosse TERÇA.
+   Para usar o dia real da semana, troque por:  const DIA_TESTE = null; */
+const DIA_TESTE = null;
+
+const promocoesDaSemana = {
+ 0: null,
+ 1: null,
+ 2: {
+  dia:"Terça",
+  titulo:"🔥 Terça do Refri!",
+  descricao:"Na compra de uma pizza tamanho FAMÍLIA GANHE um refrigerante 1L"
+ },
+ 3: {
+  dia:"Quarta",
+  titulo:"🍕 Quarta da Borda!",
+  descricao:"Na compra de qualquer pizza GANHE borda recheada GRÁTIS"
+ },
+ 4: {
+  dia:"Quinta",
+  titulo:"⭐ Quinta Dupla!",
+  descricao:"Na compra de duas pizzas tamanho FAMÍLIA GANHE uma Coca-Cola 2L"
+ },
+ 5: null,
+ 6: null
+};
+
+function diaDaPromocao(){
+
+ return DIA_TESTE !== null
+ ? DIA_TESTE
+ : new Date().getDay();
+
+}
+
+function mostrarPromocaoDoDia(){
+
+ const banner = document.getElementById("bannerPromocao");
+
+ if(!banner) return;
+
+ const promo = promocoesDaSemana[diaDaPromocao()];
+
+ if(!promo){
+  banner.style.display = "none";
+  banner.innerHTML = "";
+  return;
+ }
+
+ banner.innerHTML = `
+  <span class="promo-etiqueta">PROMOÇÃO DE ${promo.dia.toUpperCase()}</span>
+  <div class="promo-titulo">${promo.titulo}</div>
+  <div class="promo-descricao">${promo.descricao}</div>
+ `;
+
+ banner.style.display = "block";
+
+}
+
+function contarFamilias(){
+
+ return pedido.pizzas.filter(p => p.tamanho === "familia").length;
+
+}
+
+/* Quarta: borda recheada grátis em qualquer pizza */
+function bordaEhGratis(){
+
+ return diaDaPromocao() === 3;
+
+}
+
+function precoBordaDaPizza(pizza){
+
+ if(bordaEhGratis()) return 0;
+
+ return pizza.tamanho === "broto" ? 7.90 : 11.90;
+
+}
+
+function recalcularPrecosBorda(){
+
+ pedido.pizzas.forEach(pizza=>{
+
+  if(pizza.borda){
+   pizza.precoBorda = precoBordaDaPizza(pizza);
+  }
+
+ });
+
+}
+
+/* Brindes calculados na hora a partir das pizzas do pedido:
+   Terça  = 1 refrigerante 1L por pizza FAMÍLIA
+   Quinta = 1 Coca-Cola 2L a cada 2 pizzas FAMÍLIA */
+function calcularBrindes(){
+
+ const dia = diaDaPromocao();
+ const familias = contarFamilias();
+ const brindes = [];
+
+ if(dia === 2 && familias > 0){
+
+  brindes.push({
+   nome:"Refrigerante 1L (sabor conforme disponibilidade)",
+   qtd:familias
+  });
+
+ }
+
+ if(dia === 4 && familias >= 2){
+
+  brindes.push({
+   nome:"Coca-Cola 2L",
+   qtd:Math.floor(familias / 2)
+  });
+
+ }
+
+ return brindes;
+
+}
+
+function htmlBrindes(){
+
+ const brindes = calcularBrindes();
+
+ if(brindes.length === 0) return "";
+
+ let html = `<p>🎁 <strong>Brinde da promoção:</strong><br>`;
+
+ brindes.forEach(b=>{
+  html += `${b.qtd}x ${b.nome} - <strong>GRÁTIS</strong><br>`;
+ });
+
+ html += `</p>`;
+
+ return html;
+
+}
+
+/* dica no Passo 1 para o cliente aproveitar a promoção */
+function dicaPromocao(){
+
+ const dia = diaDaPromocao();
+ const familias = contarFamilias();
+
+ if(dia === 2 && familias === 0){
+  return "💡 Na terça o refrigerante 1L grátis vale para pizza FAMÍLIA.";
+ }
+
+ if(dia === 3){
+  return "💡 Hoje a borda recheada é grátis! Escolha no próximo passo.";
+ }
+
+ if(dia === 4 && familias % 2 === 1){
+  return "💡 Falta mais 1 pizza FAMÍLIA para ganhar a Coca-Cola 2L.";
+ }
+
+ return "";
+
+}
+
 function mostrarEtapa(numero){
 
  document.querySelectorAll(".tela").forEach(tela=>{
@@ -253,6 +419,7 @@ function mostrarEtapa(numero){
 
  if(numero === 2){
 
+  mostrarPromocaoDoDia();
   renderizarPizzasAdicionadas();
   atualizarBotaoContinuarPasso1();
 
@@ -553,6 +720,14 @@ function renderizarPizzasAdicionadas(){
 
  });
 
+ html += htmlBrindes();
+
+ const dica = dicaPromocao();
+
+ if(dica){
+  html += `<p class="dica-promocao">${dica}</p>`;
+ }
+
  container.innerHTML = html;
 
 }
@@ -584,6 +759,8 @@ function atualizarBotaoContinuarPasso1(){
 /* ===== PASSO 1 -> PASSO 2 ===== */
 function irParaBordas(){
 
+ recalcularPrecosBorda();
+
  renderizarBordasPizzas();
  carregarBebidas();
 
@@ -605,6 +782,11 @@ function renderizarBordasPizzas(){
 
   const acrescimo =
   pizza.tamanho === "broto" ? "7,90" : "11,90";
+
+  const textoAcrescimo =
+  bordaEhGratis()
+  ? "🎁 GRÁTIS - Promoção de Quarta"
+  : "Acréscimo: R$ " + acrescimo;
 
   container.innerHTML += `
    <div class="card-pizza-borda">
@@ -628,7 +810,7 @@ function renderizarBordasPizzas(){
       class="opcao opcao-pequena${pizza.tipoBorda === "catupiry" ? " selecionado" : ""}"
       onclick="selecionarBordaPizza(${i}, 'catupiry')">
       Catupiry
-      <br><small>Acréscimo: R$ ${acrescimo}</small>
+      <br><small>${textoAcrescimo}</small>
      </button>
 
      <button
@@ -636,7 +818,7 @@ function renderizarBordasPizzas(){
       class="opcao opcao-pequena${pizza.tipoBorda === "cheddar" ? " selecionado" : ""}"
       onclick="selecionarBordaPizza(${i}, 'cheddar')">
       Cheddar
-      <br><small>Acréscimo: R$ ${acrescimo}</small>
+      <br><small>${textoAcrescimo}</small>
      </button>
 
     </div>
@@ -665,10 +847,7 @@ function selecionarBordaPizza(indice, tipo){
   pizza.borda = true;
   pizza.tipoBorda = tipo;
 
-  pizza.precoBorda =
-   pizza.tamanho === "broto"
-   ? 7.90
-   : 11.90;
+  pizza.precoBorda = precoBordaDaPizza(pizza);
 
  }
 
@@ -880,6 +1059,7 @@ function carregarRascunho(){
   if(continuar){
 
    pedido = dados;
+   recalcularPrecosBorda();
 
    mostrarEtapa(2);
 
@@ -974,6 +1154,10 @@ function atualizarCarrinhoFlutuante(){
  }else{
   resumo = resumo.replace(/<br>$/, "");
  }
+
+ calcularBrindes().forEach(b=>{
+  resumo += `<br>🎁 ${b.qtd}x ${b.nome}`;
+ });
 
  document.getElementById("resumoFlutuante")
  .innerHTML = resumo;
@@ -1116,6 +1300,8 @@ if(!bairroEncontrado){
  }
  </p>
 
+ ${htmlBrindes()}
+
  <hr>
 
  <h2>
@@ -1187,6 +1373,10 @@ if(pizza.borda){
  pizza.tipoBorda === "cheddar"
         ? " + Borda Cheddar"
         : " + Borda Catupiry";
+
+ if(pizza.precoBorda === 0){
+  pizzasTexto += " 🎁 (GRÁTIS - Promoção)";
+ }
 }
 
   pizzasTexto += "\n";
@@ -1201,6 +1391,34 @@ if(pizza.borda){
   ` ${item.nome} (${item.qtd}x)\n`;
 
  });
+
+let brindesTexto = "";
+
+ calcularBrindes().forEach(b=>{
+
+  brindesTexto +=
+  ` 🎁 BRINDE: ${b.qtd}x ${b.nome}\n`;
+
+ });
+
+/* linha "Promoção:" lida pelo painel de pedidos (só quando a promoção realmente foi aplicada) */
+let promocaoTexto = "";
+let promoNome = "";
+
+const promoAplicada =
+ calcularBrindes().length > 0 ||
+ (bordaEhGratis() && pedido.pizzas.some(p => p.borda));
+
+if(promoAplicada){
+
+ const promoDoDia = promocoesDaSemana[diaDaPromocao()];
+
+ if(promoDoDia){
+  promocaoTexto = `Promoção: ${promoDoDia.dia}\n\n`;
+  promoNome = promoDoDia.titulo.replace(/[^\p{L}\p{N}\s]/gu, "").trim();
+ }
+
+}
 
 const codigoPedido =
 Date.now()
@@ -1228,6 +1446,7 @@ Complemento: ${complemento}
 ${pizzasTexto}
 
 ${bebidasTexto}
+${brindesTexto}
 
 --------------------------------
 Frete: ${
@@ -1238,20 +1457,62 @@ Frete: ${
 --------------------------------
 Total: R$ ${pedido.total.toFixed(2)}
 
-Forma de Pagamento: ${formaPagamento}
+${promocaoTexto}Forma de Pagamento: ${formaPagamento}
 
 Observações:
 ${obs}
 
 `;
+const subtotalPlanilha =
+ totalPizzas() + totalBebidas();
+
+let brindesPlanilha = "";
+
+calcularBrindes().forEach(b=>{
+ brindesPlanilha += `${b.qtd}x ${b.nome}; `;
+});
+
 const dadosPedido = {
 
- pedido: codigoPedido,
+ pedido: String(codigoPedido),
+
+ data: new Date().toLocaleString("pt-BR"),
 
  nome: nome,
 
+ telefone: telefone,
+
+ rua: rua,
+
+ numero: numero,
+
+ complemento: complemento,
+
+ bairro: bairro,
+
+ pizzas: pizzasTexto.trim(),
+
+ bebidas: bebidasTexto.trim(),
+
+ promocao: promoNome,
+
+ brindes: brindesPlanilha.trim().replace(/;$/, ""),
+
+ subtotal: subtotalPlanilha.toFixed(2),
+
+ frete:
+ pedido.frete === null
+ ? "A calcular"
+ : pedido.frete.toFixed(2),
+
  total:
- pedido.total.toFixed(2)
+ pedido.total.toFixed(2),
+
+ formaPagamento: formaPagamento,
+
+ observacoes: obs,
+
+ origem: "Site"
 
 };
 
@@ -1338,7 +1599,7 @@ function mostrarConfirmacao(){
         ? "Cheddar"
         : "Catupiry"
 }
-- R$ ${pizza.precoBorda.toFixed(2)}
+- ${pizza.precoBorda === 0 ? "🎁 GRÁTIS" : "R$ " + pizza.precoBorda.toFixed(2)}
 </p>
 `;
    total += pizza.precoBorda;
@@ -1367,6 +1628,8 @@ html += `
   });
 
  }
+
+ html += htmlBrindes();
 
  html += `
  <h2>
