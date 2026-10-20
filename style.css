@@ -658,3 +658,61 @@ background:#25D366;
 .pedido-enviado .continuar{
     max-width:340px;
 }
+
+
+/* ===== BANNER DE PROMOÇÃO DO DIA ===== */
+
+.banner-promocao{
+    display:none;
+    background:linear-gradient(135deg,#b71c1c,#e53935);
+    color:white;
+    border-radius:15px;
+    padding:16px 18px;
+    margin-bottom:20px;
+    box-shadow:0 4px 14px rgba(183,28,28,.35);
+    text-align:center;
+}
+
+.banner-promocao .promo-etiqueta{
+    display:inline-block;
+    background:#ffeb3b;
+    color:#b71c1c;
+    font-size:12px;
+    font-weight:700;
+    padding:3px 12px;
+    border-radius:20px;
+    margin-bottom:8px;
+}
+
+.banner-promocao .promo-titulo{
+    font-size:19px;
+    font-weight:700;
+    margin-bottom:4px;
+}
+
+.banner-promocao .promo-descricao{
+    font-size:14px;
+    opacity:.95;
+    line-height:20px;
+}
+
+/* dica / brinde da promoção no Passo 1 */
+.dica-promocao{
+    background:#fff8e1;
+    border:1px dashed #ffb300;
+    color:#8a5a00;
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:10px;
+}
+
+.lista-pizzas-adicionadas > p{
+    background:#eafff2;
+    border:1px solid #25D366;
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:14px;
+    margin-bottom:10px;
+}
