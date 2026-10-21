@@ -94,6 +94,13 @@ imagem:"imagens/mussarela.jpg",
  descricao:"Molho, muçarela, azeitona e orégano"
 },
 {
+ name:"Napolitana",
+ preco:49.90,
+ precoBroto:34.90,
+imagem:"imagens/napolitana.jpg",
+ descricao:"Molho, muçarela, presunto, cebola, tomate, orégano e azeitona"
+},
+{
  name:"Portuguesa",
  preco:57.90,
  precoBroto:39.90,
@@ -178,6 +185,20 @@ const bebidas = [
  {name:"Guaraná Antarctica 2L",preco:12.90},
 {name:"Mate Couro 1L",preco:7.90},
 {name:"Guarana Antarctica 1L",preco:7.90}
+];
+
+/* ===== ADICIONAIS (ingredientes extras, por pizza) ===== */
+const ADICIONAIS = [
+ {nome:"Presunto",  preco:5},
+ {nome:"Lombinho",  preco:10},
+ {nome:"Calabresa", preco:5},
+ {nome:"Frango",    preco:5},
+ {nome:"Bacon",     preco:5},
+ {nome:"Catupiry",  preco:7},
+ {nome:"Costela",   preco:15},
+ {nome:"Provolone", preco:6},
+ {nome:"Parmesão",  preco:5},
+ {nome:"Ovo",       preco:4}
 ];
 
 let pedido = {
@@ -501,6 +522,7 @@ function itemSaborFamiliaHtml(pizza, index){
         src="${pizza.imagem || ''}"
         alt="${pizza.name}"
         class="foto-pizza"
+        onerror="this.style.display='none'"
     >
 
    <div>
@@ -535,6 +557,7 @@ function itemSaborBrotoHtml(pizza, index){
         src="${pizza.imagem || ''}"
         alt="${pizza.name}"
         class="foto-pizza"
+        onerror="this.style.display='none'"
     >
 
    <div>
@@ -633,7 +656,8 @@ function finalizarPizzaFamilia(){
   tamanho:"familia",
   borda:false,
   tipoBorda:"",
-  precoBorda:0
+  precoBorda:0,
+  adicionais:[]
  });
 
  limparMontagemFamilia();
@@ -671,7 +695,8 @@ function escolherPizzaBroto(nome,preco){
     tamanho:"broto",
     borda:false,
     tipoBorda:"",
-    precoBorda:0
+    precoBorda:0,
+  adicionais:[]
 });
 
  renderizarPizzasAdicionadas();
@@ -822,6 +847,8 @@ function renderizarBordasPizzas(){
      </button>
 
     </div>
+
+    ${htmlAdicionaisPizza(pizza, i)}
 
    </div>
   `;
@@ -995,6 +1022,79 @@ function totalBebidas(){
 
 }
 
+function precoAdicionais(pizza){
+
+ let total = 0;
+
+ (pizza.adicionais || []).forEach(nome=>{
+
+  const a = ADICIONAIS.find(x => x.nome === nome);
+
+  if(a) total += a.preco;
+
+ });
+
+ return total;
+
+}
+
+function htmlAdicionaisPizza(pizza, i){
+
+ const selecionados = pizza.adicionais || [];
+
+ let html = `
+  <details class="adicionais-pizza" ${selecionados.length ? "open" : ""}>
+   <summary>➕ Adicionais (opcional)</summary>
+   <div class="opcoes-adicionais">
+ `;
+
+ ADICIONAIS.forEach((a,k)=>{
+
+  html += `
+   <button
+    id="btnAdic${i}_${k}"
+    class="opcao opcao-pequena${selecionados.includes(a.nome) ? " selecionado" : ""}"
+    onclick="alternarAdicional(${i}, ${k})">
+    ${a.nome}
+    <br><small>+ R$ ${a.preco.toFixed(2).replace(".", ",")}</small>
+   </button>
+  `;
+
+ });
+
+ html += `</div></details>`;
+
+ return html;
+
+}
+
+function alternarAdicional(i, k){
+
+ const pizza = pedido.pizzas[i];
+
+ if(!pizza) return;
+
+ if(!pizza.adicionais) pizza.adicionais = [];
+
+ const nome = ADICIONAIS[k].nome;
+ const pos = pizza.adicionais.indexOf(nome);
+
+ if(pos >= 0){
+  pizza.adicionais.splice(pos, 1);
+ }else{
+  pizza.adicionais.push(nome);
+ }
+
+ const btn = document.getElementById(`btnAdic${i}_${k}`);
+
+ if(btn){
+  btn.classList.toggle("selecionado", pos < 0);
+ }
+
+ atualizarCarrinhoFlutuante();
+
+}
+
 function totalPizzas(){
 
  let total = 0;
@@ -1003,6 +1103,7 @@ function totalPizzas(){
 
   total += pizza.preco;
   total += pizza.precoBorda;
+  total += precoAdicionais(pizza);
 
  });
 
@@ -1145,7 +1246,7 @@ function atualizarCarrinhoFlutuante(){
 
  pedido.pizzas.forEach(pizza=>{
 
-  resumo += `🍕 ${pizza.sabor}<br>`;
+  resumo += `🍕 ${pizza.sabor}${(pizza.adicionais || []).length ? " (+" + pizza.adicionais.join(", ") + ")" : ""}<br>`;
 
  });
 
@@ -1379,6 +1480,10 @@ if(pizza.borda){
  }
 }
 
+  (pizza.adicionais || []).forEach(nome=>{
+   pizzasTexto += ` + Adicional: ${nome}`;
+  });
+
   pizzasTexto += "\n";
 
  });
@@ -1605,6 +1710,23 @@ function mostrarConfirmacao(){
    total += pizza.precoBorda;
 
   }
+
+  (pizza.adicionais || []).forEach(nome=>{
+
+   const a = ADICIONAIS.find(x => x.nome === nome);
+
+   if(!a) return;
+
+   html += `
+<p>
+ ➕ Adicional ${a.nome}
+ - R$ ${a.preco.toFixed(2)}
+</p>
+`;
+
+   total += a.preco;
+
+  });
 
   html += "<hr>";
 
