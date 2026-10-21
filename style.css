@@ -716,3 +716,32 @@ background:#25D366;
     font-size:14px;
     margin-bottom:10px;
 }
+
+
+/* ===== ADICIONAIS (Passo 2) ===== */
+.adicionais-pizza{
+    margin-top:14px;
+    border-top:1px dashed #ddd;
+    padding-top:12px;
+}
+
+.adicionais-pizza summary{
+    cursor:pointer;
+    font-weight:600;
+    color:#b71c1c;
+    font-size:15px;
+    margin-bottom:10px;
+}
+
+.opcoes-adicionais{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+}
+
+.opcoes-adicionais .opcao-pequena{
+    padding:10px;
+    font-size:14px;
+    text-align:center;
+}
