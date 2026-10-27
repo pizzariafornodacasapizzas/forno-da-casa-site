@@ -36,8 +36,6 @@ Carregando...
 
 <p>🕒 Terça a Domingo • 18h às 23h</p>
 
-<div id="promoSemanaHome" class="promo-semana-home"></div>
-
 <button class="btn-home" onclick="mostrarEtapa(2)">
 🍕 Fazer Pedido
 </button>
@@ -165,40 +163,32 @@ Confirmar Dados
 
 </section>
 
-<!-- ETAPA 9 = PASSO 5: Finalizar -->
+<!-- ETAPA 9 = PASSO 5: Resumo Final (já mostra "Pedido enviado!" depois de confirmar) -->
 
 <section id="etapa9" class="tela">
 
-<h2>Resumo Final</h2>
+<h2 id="tituloResumoFinal">Resumo Final</h2>
 
 <div id="resumoFinal"></div>
 
-<button class="whatsapp" onclick="finalizarPedido()">
-✅ Confirmar Pedido
-</button>
-</section>
+<!-- aparece depois que o pedido é enviado -->
+<div id="confirmacaoFinal" class="pedido-enviado" style="display:none;">
 
-<!-- ETAPA 10: Pedido enviado (pós-checkout) -->
+<div class="check-enviado">✅</div>
 
-<section id="etapa10" class="tela">
-
-<div class="pedido-enviado">
-
-<div id="checkEnviado" class="check-enviado">✅</div>
-
-<h2 id="tituloEnviado">Pedido enviado!</h2>
+<h2>Pedido enviado!</h2>
 
 <p id="textoEnviado"></p>
 
-<button id="btnWhatsEnviado" class="continuar" onclick="abrirWhatsAppPedido()">
-💬 Falar com a pizzaria no WhatsApp
-</button>
-
-<button id="btnNovoPedido" class="continuar btn-verde" onclick="fazerNovoPedido()">
-🍕 Fazer novo pedido
-</button>
-
 </div>
+
+<button id="btnConfirmarWhats" class="whatsapp" onclick="finalizarPedido()">
+✅ Confirmar pedido e enviar no WhatsApp
+</button>
+
+<button id="btnNovoPedidoResumo" class="continuar" onclick="novoPedidoDoResumo()">
+🍕 Novo pedido
+</button>
 
 </section>
 
