@@ -287,6 +287,51 @@ function diaDaPromocao(){
 
 }
 
+/* Dias SEM promoção: mostra um aviso com as promoções da semana (terça, quarta, quinta) */
+function htmlPromocoesSemana(){
+
+ let linhas = "";
+
+ [2,3,4].forEach(d=>{
+
+  const p = promocoesDaSemana[d];
+
+  if(!p) return;
+
+  linhas += `
+   <div class="semana-item">
+    <strong>${p.titulo}</strong>
+    <span>${p.descricao}</span>
+   </div>
+  `;
+
+ });
+
+ return `
+  <span class="promo-etiqueta promo-etiqueta-semana">📅 PROMOÇÕES DA SEMANA</span>
+  <div class="semana-subtitulo">Hoje não tem promoção, mas volte nesses dias:</div>
+  ${linhas}
+ `;
+
+}
+
+function mostrarPromocoesHome(){
+
+ const caixa = document.getElementById("promoSemanaHome");
+
+ if(!caixa) return;
+
+ if(promocoesDaSemana[diaDaPromocao()]){
+  caixa.style.display = "none";
+  caixa.innerHTML = "";
+  return;
+ }
+
+ caixa.innerHTML = htmlPromocoesSemana();
+ caixa.style.display = "block";
+
+}
+
 function mostrarPromocaoDoDia(){
 
  const banner = document.getElementById("bannerPromocao");
@@ -296,10 +341,13 @@ function mostrarPromocaoDoDia(){
  const promo = promocoesDaSemana[diaDaPromocao()];
 
  if(!promo){
-  banner.style.display = "none";
-  banner.innerHTML = "";
+  banner.className = "banner-promocao banner-semana";
+  banner.innerHTML = htmlPromocoesSemana();
+  banner.style.display = "block";
   return;
  }
+
+ banner.className = "banner-promocao";
 
  banner.innerHTML = `
   <span class="promo-etiqueta">PROMOÇÃO DE ${promo.dia.toUpperCase()}</span>
@@ -437,6 +485,12 @@ function mostrarEtapa(numero){
  }
 
  atualizarProgresso(mapaProgresso[numero] || null);
+
+ if(numero === 1){
+
+  mostrarPromocoesHome();
+
+ }
 
  if(numero === 2){
 
@@ -1417,12 +1471,12 @@ document.querySelector(".whatsapp");
 if(pedido.frete === null){
 
  btnWhatsapp.innerHTML =
- "📲 Enviar Pedido no WhatsApp<br>e Solicitar Valor do Frete";
+ "✅ Confirmar Pedido<br><small>O valor do frete confirmamos com você</small>";
 
 }else{
 
  btnWhatsapp.innerHTML =
- "📲 Enviar Pedido no WhatsApp";
+ "✅ Confirmar Pedido";
 
 }
 
@@ -1430,7 +1484,12 @@ if(pedido.frete === null){
 
 }
 
-function finalizarPedido(){
+let enviandoPedido = false;
+let ultimoPedidoEnviado = {codigo:"", msg:""};
+
+async function finalizarPedido(){
+
+ if(enviandoPedido) return;
 
  const nome =
  document.getElementById("nome").value;
@@ -1621,32 +1680,112 @@ const dadosPedido = {
 
 };
 
-fetch(URL_PLANILHA, {
+/* Registra o pedido na planilha (a pizzaria é avisada por lá).
+   Só mostra "Pedido enviado" se a planilha confirmou. */
+enviandoPedido = true;
 
- method: "POST",
+const botaoEnviar = document.querySelector("#etapa9 .whatsapp");
+if(botaoEnviar){
+ botaoEnviar.disabled = true;
+ botaoEnviar.innerHTML = "⏳ Enviando pedido...";
+}
 
- body: JSON.stringify(dadosPedido)
+const registrado = await enviarPedidoParaPlanilha(dadosPedido);
 
-})
-.then(() => {
+enviandoPedido = false;
 
- console.log("Pedido salvo");
+if(botaoEnviar){
+ botaoEnviar.disabled = false;
+ botaoEnviar.innerHTML = "✅ Confirmar Pedido";
+}
 
-})
-.catch((erro) => {
-
- console.error(erro);
-
-});
- 
-window.open(
- `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`,
- "_blank"
- );
+ultimoPedidoEnviado = { codigo: String(codigoPedido), msg: msg };
 
 limparRascunho();
 
-mostrarEtapa(10);
+mostrarTelaPedidoEnviado(registrado);
+
+}
+
+async function enviarPedidoParaPlanilha(dados){
+
+ const controle = new AbortController();
+ const timer = setTimeout(()=> controle.abort(), 20000);
+
+ try{
+
+  const resposta = await fetch(URL_PLANILHA, {
+   method: "POST",
+   body: JSON.stringify(dados),
+   signal: controle.signal
+  });
+
+  if(!resposta.ok) return false;
+
+  try{
+   const resultado = await resposta.json();
+   if(resultado && resultado.ok === false) return false;
+  }catch(e){
+   /* resposta sem JSON: o que importa é o status HTTP ter sido OK */
+  }
+
+  return true;
+
+ }catch(erro){
+
+  console.error("Falha ao registrar pedido na planilha:", erro);
+  return false;
+
+ }finally{
+
+  clearTimeout(timer);
+
+ }
+
+}
+
+function mostrarTelaPedidoEnviado(registrado){
+
+ const titulo = document.getElementById("tituloEnviado");
+ const texto = document.getElementById("textoEnviado");
+ const btnWhats = document.getElementById("btnWhatsEnviado");
+ const btnNovo = document.getElementById("btnNovoPedido");
+ const check = document.getElementById("checkEnviado");
+
+ if(registrado){
+
+  check.innerHTML = "✅";
+  titulo.innerHTML = "Pedido enviado!";
+  texto.innerHTML =
+   "Recebemos o seu pedido <strong>Nº " + ultimoPedidoEnviado.codigo.slice(-4) + "</strong>. " +
+   "Vamos conferir e falar com você pelo WhatsApp para confirmar (e informar o frete, se precisar).";
+  btnWhats.innerHTML = "💬 Falar com a pizzaria no WhatsApp";
+  btnWhats.className = "continuar";
+  btnNovo.className = "continuar btn-verde";
+
+ }else{
+
+  check.innerHTML = "⚠️";
+  titulo.innerHTML = "Falta só um passo";
+  texto.innerHTML =
+   "Não conseguimos registrar o seu pedido direto. " +
+   "<strong>Toque no botão abaixo e envie a mensagem pelo WhatsApp</strong> para a pizzaria receber.";
+  btnWhats.innerHTML = "📲 Enviar pedido no WhatsApp";
+  btnWhats.className = "continuar btn-verde";
+  btnNovo.className = "continuar";
+
+ }
+
+ mostrarEtapa(10);
+
+}
+
+function abrirWhatsAppPedido(){
+
+ window.open(
+  `https://wa.me/${whatsapp}?text=${encodeURIComponent(ultimoPedidoEnviado.msg)}`,
+  "_blank"
+ );
 
 }
 
