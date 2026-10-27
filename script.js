@@ -308,8 +308,7 @@ function htmlPromocoesSemana(){
  });
 
  return `
-  <span class="promo-etiqueta promo-etiqueta-semana">📅 PROMOÇÕES DA SEMANA</span>
-  <div class="semana-subtitulo">Hoje não tem promoção, mas volte nesses dias:</div>
+  <span class="promo-etiqueta">📅 PROMOÇÕES DA SEMANA</span>
   ${linhas}
  `;
 
@@ -317,18 +316,14 @@ function htmlPromocoesSemana(){
 
 function mostrarPromocoesHome(){
 
+ /* O quadro "Promoções da semana" não aparece mais na tela inicial.
+    Ele agora aparece no passo "Monte sua pizza", só em dias sem promoção. */
  const caixa = document.getElementById("promoSemanaHome");
 
  if(!caixa) return;
 
- if(promocoesDaSemana[diaDaPromocao()]){
-  caixa.style.display = "none";
-  caixa.innerHTML = "";
-  return;
- }
-
- caixa.innerHTML = htmlPromocoesSemana();
- caixa.style.display = "block";
+ caixa.style.display = "none";
+ caixa.innerHTML = "";
 
 }
 
@@ -1466,19 +1461,21 @@ if(!bairroEncontrado){
  `;
 
 const btnWhatsapp =
-document.querySelector(".whatsapp");
+document.getElementById("btnConfirmarWhats");
 
 if(pedido.frete === null){
 
  btnWhatsapp.innerHTML =
- "✅ Confirmar Pedido<br><small>O valor do frete confirmamos com você</small>";
+ "✅ Confirmar pedido e enviar no WhatsApp";
 
 }else{
 
  btnWhatsapp.innerHTML =
- "✅ Confirmar Pedido";
+ "✅ Confirmar pedido e enviar no WhatsApp";
 
 }
+
+ prepararTelaResumoFinal();
 
  mostrarEtapa(9);
 
@@ -1680,30 +1677,66 @@ const dadosPedido = {
 
 };
 
-/* Registra o pedido na planilha (a pizzaria é avisada por lá).
-   Só mostra "Pedido enviado" se a planilha confirmou. */
+/* Ao tocar em "Confirmar pedido e enviar no WhatsApp":
+   1) registra o pedido na planilha
+   2) abre o WhatsApp com a mensagem pronta (sempre, registrado ou não)
+   3) mostra "Pedido enviado!" na própria tela do Resumo Final */
 enviandoPedido = true;
 
-const botaoEnviar = document.querySelector("#etapa9 .whatsapp");
+const botaoEnviar = document.getElementById("btnConfirmarWhats");
 if(botaoEnviar){
  botaoEnviar.disabled = true;
  botaoEnviar.innerHTML = "⏳ Enviando pedido...";
 }
 
+/* Abre já a aba do WhatsApp no toque do cliente (antes do await),
+   senão o navegador do celular bloqueia como pop-up.
+   Depois que a planilha responder, a aba é direcionada ao WhatsApp. */
+let janelaWhats = null;
+
+try{
+ janelaWhats = window.open("", "_blank");
+ if(janelaWhats){
+  janelaWhats.document.write(
+   "<p style='font-family:sans-serif;padding:20px'>Enviando pedido...</p>"
+  );
+ }
+}catch(e){
+ janelaWhats = null;
+}
+
 const registrado = await enviarPedidoParaPlanilha(dadosPedido);
+
+if(!registrado){
+ console.warn("Pedido não registrado na planilha; segue pelo WhatsApp.");
+}
 
 enviandoPedido = false;
 
 if(botaoEnviar){
  botaoEnviar.disabled = false;
- botaoEnviar.innerHTML = "✅ Confirmar Pedido";
+ botaoEnviar.innerHTML = "✅ Confirmar pedido e enviar no WhatsApp";
 }
 
 ultimoPedidoEnviado = { codigo: String(codigoPedido), msg: msg };
 
 limparRascunho();
 
-mostrarTelaPedidoEnviado(registrado);
+mostrarPedidoEnviadoNoResumo();
+
+const urlWhats =
+`https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+
+if(janelaWhats && !janelaWhats.closed){
+
+ janelaWhats.location.href = urlWhats;
+
+}else{
+
+ /* pop-up bloqueado: abre na mesma aba */
+ setTimeout(()=>{ window.location.href = urlWhats; }, 400);
+
+}
 
 }
 
@@ -1744,48 +1777,71 @@ async function enviarPedidoParaPlanilha(dados){
 
 }
 
-function mostrarTelaPedidoEnviado(registrado){
+/* ===== PASSO 5 (Resumo Final): estados da tela ===== */
+let pedidoJaEnviado = false;
 
- const titulo = document.getElementById("tituloEnviado");
- const texto = document.getElementById("textoEnviado");
- const btnWhats = document.getElementById("btnWhatsEnviado");
- const btnNovo = document.getElementById("btnNovoPedido");
- const check = document.getElementById("checkEnviado");
+/* estado inicial: resumo + botões "Confirmar pedido e enviar no WhatsApp" e "Novo pedido" */
+function prepararTelaResumoFinal(){
 
- if(registrado){
+ pedidoJaEnviado = false;
 
-  check.innerHTML = "✅";
-  titulo.innerHTML = "Pedido enviado!";
-  texto.innerHTML =
-   "Recebemos o seu pedido <strong>Nº " + ultimoPedidoEnviado.codigo.slice(-4) + "</strong>. " +
-   "Vamos conferir e falar com você pelo WhatsApp para confirmar (e informar o frete, se precisar).";
-  btnWhats.innerHTML = "💬 Falar com a pizzaria no WhatsApp";
-  btnWhats.className = "continuar";
-  btnNovo.className = "continuar btn-verde";
+ const tituloResumo = document.getElementById("tituloResumoFinal");
+ const resumo = document.getElementById("resumoFinal");
+ const btnConfirmar = document.getElementById("btnConfirmarWhats");
+ const confirmacao = document.getElementById("confirmacaoFinal");
+ const btnNovo = document.getElementById("btnNovoPedidoResumo");
 
- }else{
-
-  check.innerHTML = "⚠️";
-  titulo.innerHTML = "Falta só um passo";
-  texto.innerHTML =
-   "Não conseguimos registrar o seu pedido direto. " +
-   "<strong>Toque no botão abaixo e envie a mensagem pelo WhatsApp</strong> para a pizzaria receber.";
-  btnWhats.innerHTML = "📲 Enviar pedido no WhatsApp";
-  btnWhats.className = "continuar btn-verde";
-  btnNovo.className = "continuar";
-
- }
-
- mostrarEtapa(10);
+ if(tituloResumo) tituloResumo.style.display = "block";
+ if(resumo) resumo.style.display = "block";
+ if(btnConfirmar) btnConfirmar.style.display = "block";
+ if(confirmacao) confirmacao.style.display = "none";
+ if(btnNovo) btnNovo.style.display = "block";
 
 }
 
-function abrirWhatsAppPedido(){
+/* estado final: "Pedido enviado!" + botão "Novo pedido" (sem outra tela) */
+function mostrarPedidoEnviadoNoResumo(){
 
- window.open(
-  `https://wa.me/${whatsapp}?text=${encodeURIComponent(ultimoPedidoEnviado.msg)}`,
-  "_blank"
- );
+ pedidoJaEnviado = true;
+
+ const tituloResumo = document.getElementById("tituloResumoFinal");
+ const resumo = document.getElementById("resumoFinal");
+ const btnConfirmar = document.getElementById("btnConfirmarWhats");
+ const confirmacao = document.getElementById("confirmacaoFinal");
+ const texto = document.getElementById("textoEnviado");
+ const btnNovo = document.getElementById("btnNovoPedidoResumo");
+
+ if(tituloResumo) tituloResumo.style.display = "none";
+ if(resumo) resumo.style.display = "none";
+ if(btnConfirmar) btnConfirmar.style.display = "none";
+
+ if(texto){
+  texto.innerHTML =
+   "Recebemos o seu pedido <strong>Nº " + ultimoPedidoEnviado.codigo.slice(-4) + "</strong>. " +
+   "Vamos conferir e falar com você pelo WhatsApp para confirmar.";
+ }
+
+ if(confirmacao) confirmacao.style.display = "block";
+ if(btnNovo) btnNovo.style.display = "block";
+
+ window.scrollTo(0,0);
+
+}
+
+/* botão "Novo pedido" do Resumo Final */
+function novoPedidoDoResumo(){
+
+ if(!pedidoJaEnviado){
+
+  const descartar = confirm(
+   "Seu pedido ainda não foi enviado. Deseja descartá-lo e começar um novo?"
+  );
+
+  if(!descartar) return;
+
+ }
+
+ fazerNovoPedido();
 
 }
 
