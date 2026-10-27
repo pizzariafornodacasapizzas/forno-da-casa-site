@@ -36,6 +36,8 @@ Carregando...
 
 <p>🕒 Terça a Domingo • 18h às 23h</p>
 
+<div id="promoSemanaHome" class="promo-semana-home"></div>
+
 <button class="btn-home" onclick="mostrarEtapa(2)">
 🍕 Fazer Pedido
 </button>
@@ -172,8 +174,7 @@ Confirmar Dados
 <div id="resumoFinal"></div>
 
 <button class="whatsapp" onclick="finalizarPedido()">
-📲 Enviar Pedido no WhatsApp<br>
-e Solicitar Valor do Frete
+✅ Confirmar Pedido
 </button>
 </section>
 
@@ -183,13 +184,17 @@ e Solicitar Valor do Frete
 
 <div class="pedido-enviado">
 
-<div class="check-enviado">✅</div>
+<div id="checkEnviado" class="check-enviado">✅</div>
 
-<h2>Pedido enviado!</h2>
+<h2 id="tituloEnviado">Pedido enviado!</h2>
 
-<p>Seu pedido foi enviado pelo WhatsApp. Fique de olho no chat pra confirmar com a gente.</p>
+<p id="textoEnviado"></p>
 
-<button class="continuar btn-verde" onclick="fazerNovoPedido()">
+<button id="btnWhatsEnviado" class="continuar" onclick="abrirWhatsAppPedido()">
+💬 Falar com a pizzaria no WhatsApp
+</button>
+
+<button id="btnNovoPedido" class="continuar btn-verde" onclick="fazerNovoPedido()">
 🍕 Fazer novo pedido
 </button>
 
