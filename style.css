@@ -745,3 +745,59 @@ background:#25D366;
     font-size:14px;
     text-align:center;
 }
+
+
+/* ===== BANNER "PROMOÇÕES DA SEMANA" (dias sem promoção) =====
+   Usa o mesmo visual do banner de promoção do dia (vermelho + etiqueta amarela) */
+.banner-promocao.banner-semana .semana-item{
+    background:rgba(255,255,255,.15);
+    border-radius:10px;
+    padding:10px 12px;
+    margin-bottom:8px;
+    font-size:14px;
+    line-height:19px;
+}
+
+.banner-promocao.banner-semana .semana-item:last-child{
+    margin-bottom:0;
+}
+
+.banner-promocao.banner-semana .semana-item strong{
+    display:block;
+    font-size:17px;
+    margin-bottom:2px;
+}
+
+/* versão compacta na Home (sobre a foto) */
+.promo-semana-home{
+    display:none;
+    width:100%;
+    max-width:400px;
+    margin-top:18px;
+    padding:14px;
+    border-radius:15px;
+    background:rgba(46,125,50,.92);
+    color:#fff;
+    text-align:left;
+}
+
+.promo-semana-home .promo-etiqueta{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    padding:3px 12px;
+    border-radius:20px;
+    margin-bottom:6px;
+}
+
+.promo-semana-home .semana-item strong{
+    font-size:14px;
+}
+
+.promo-semana-home .semana-item span{
+    font-size:13px;
+}
+
+.pedido-enviado .continuar{
+    margin-top:12px;
+}
