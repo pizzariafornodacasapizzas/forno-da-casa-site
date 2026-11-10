@@ -153,7 +153,7 @@ imagem:"imagens/Milhobacon.jpg",
  name:"Milho",
  preco:49.90,
  precoBroto:34.90,
-imagem:"imagens/Milho.jpg",
+imagem:"imagens/milho.jpg",
  descricao:"Molho, muçarela, milho, azeitona e orégano"
 },
 {
