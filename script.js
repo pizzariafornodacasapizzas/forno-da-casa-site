@@ -183,7 +183,7 @@ const bebidas = [
  {name:"Coca-Cola 2L",preco:14.90},
  {name:"Coca-Cola Zero 2L",preco:14.90},
  {name:"Guaraná Antarctica 2L",preco:12.90},
-{name:"Mate Couro 1L",preco:7.90},
+// {name:"Mate Couro 1L",preco:7.90},
 {name:"Guarana Antarctica 1L",preco:7.90}
 ];
 
