@@ -153,7 +153,7 @@ imagem:"imagens/Milhobacon.jpg",
  name:"Milho",
  preco:49.90,
  precoBroto:34.90,
-imagem:"imagens/milho.jpg",
+imagem:"imagens/Milho.jpg",
  descricao:"Molho, muçarela, milho, azeitona e orégano"
 },
 {
@@ -284,6 +284,193 @@ function diaDaPromocao(){
  return DIA_TESTE !== null
  ? DIA_TESTE
  : new Date().getDay();
+
+}
+
+/* ===== HORÁRIO DE FUNCIONAMENTO =====
+   Abrimos de terça a domingo, das 18h às 23h. Segunda não abre.
+   Fora desse horário o botão de fazer pedido fica inativo e nenhuma
+   etapa do pedido pode ser aberta. A cada 30 segundos o site confere
+   de novo, então às 18h o botão volta sozinho (sem recarregar a página).
+
+   MODO TESTE: para simular uma hora, troque HORA_TESTE por um número
+   (ex.: 20 = 20h). Para simular um dia, use o DIA_TESTE lá em cima.
+   Depois do teste, volte os dois para null. */
+const HORA_TESTE = null;
+
+const HORA_ABRE = 18;   // abre às 18h
+const HORA_FECHA = 23;  // fecha às 23h
+const DIA_FECHADO = 1;  // 1 = segunda-feira
+
+const MSG_FECHADO_SEGUNDA =
+ "Não abrimos às segundas-feiras. Faça seu pedido de terça a domingo, das 18h às 23h. 🍕";
+
+const MSG_FECHADO_HORARIO =
+ "Estamos fechados agora. Pedidos de terça a domingo, das 18h às 23h. 🍕";
+
+function horaAtual(){
+
+ return HORA_TESTE !== null
+ ? HORA_TESTE
+ : new Date().getHours();
+
+}
+
+function lojaAbertaAgora(){
+
+ const dia = diaDaPromocao();
+ const hora = horaAtual();
+
+ if(dia === DIA_FECHADO) return false;
+
+ return hora >= HORA_ABRE && hora < HORA_FECHA;
+
+}
+
+function lojaFechadaHoje(){
+
+ return !lojaAbertaAgora();
+
+}
+
+function mensagemFechado(){
+
+ return diaDaPromocao() === DIA_FECHADO
+ ? MSG_FECHADO_SEGUNDA
+ : MSG_FECHADO_HORARIO;
+
+}
+
+function avisarFechadoSegunda(){
+
+ alert(mensagemFechado());
+
+}
+
+/* Encontra os botões que começam o pedido (na tela inicial ou qualquer
+   botão que chame mostrarEtapa(2)). Guarda como eles eram para poder
+   devolver ao normal quando a loja abrir. */
+let botoesPedido = null;
+
+function encontrarBotoesPedido(){
+
+ if(botoesPedido) return botoesPedido;
+
+ const candidatos = new Set();
+
+ document
+ .querySelectorAll("[onclick*='mostrarEtapa(2']")
+ .forEach(el => candidatos.add(el));
+
+ const home = document.getElementById("etapa1");
+
+ if(home){
+
+  home
+  .querySelectorAll("button, a, [onclick]")
+  .forEach(el=>{
+
+   const texto = (el.textContent || "").toLowerCase();
+   const acao = el.getAttribute("onclick") || "";
+
+   if(/pedido|pedir|começar|comecar|iniciar|cardápio|cardapio/.test(texto)
+      || acao.indexOf("mostrarEtapa") !== -1){
+    candidatos.add(el);
+   }
+
+  });
+
+ }
+
+ botoesPedido = [...candidatos].map(el => ({
+  el: el,
+  html: el.innerHTML,
+  onclick: el.getAttribute("onclick"),
+  href: el.getAttribute("href")
+ }));
+
+ return botoesPedido;
+
+}
+
+function bloqueioDoBotao(e){
+
+ e.preventDefault();
+ e.stopPropagation();
+ avisarFechadoSegunda();
+ return false;
+
+}
+
+function bloquearBotoesPedido(){
+
+ const fechado = lojaFechadaHoje();
+ const home = document.getElementById("etapa1");
+ const botoes = encontrarBotoesPedido();
+
+ botoes.forEach(b=>{
+
+  const el = b.el;
+
+  if(fechado){
+
+   el.removeAttribute("onclick");
+   el.onclick = bloqueioDoBotao;
+   if("disabled" in el) el.disabled = true;
+   el.setAttribute("aria-disabled", "true");
+   el.removeAttribute("href");
+   el.textContent = diaDaPromocao() === DIA_FECHADO
+    ? "🔴 Fechado às segundas"
+    : "🔴 Fechado agora";
+   el.style.opacity = "0.55";
+   el.style.cursor = "not-allowed";
+   el.style.filter = "grayscale(1)";
+
+  }else if(el.getAttribute("aria-disabled") === "true"){
+
+   /* loja abriu: devolve o botão exatamente como era */
+   el.onclick = null;
+   if(b.onclick !== null) el.setAttribute("onclick", b.onclick);
+   if(b.href !== null) el.setAttribute("href", b.href);
+   if("disabled" in el) el.disabled = false;
+   el.removeAttribute("aria-disabled");
+   el.innerHTML = b.html;
+   el.style.opacity = "";
+   el.style.cursor = "";
+   el.style.filter = "";
+
+  }
+
+ });
+
+ let aviso = document.getElementById("avisoSegunda");
+
+ if(!fechado){
+  if(aviso) aviso.remove();
+  return;
+ }
+
+ if(!home) return;
+
+ if(!aviso){
+
+  aviso = document.createElement("p");
+  aviso.id = "avisoSegunda";
+  aviso.style.textAlign = "center";
+  aviso.style.fontWeight = "bold";
+  aviso.style.margin = "12px 0";
+
+  const primeiro = botoes.map(b => b.el).find(el => home.contains(el));
+
+  if(primeiro && primeiro.parentNode){
+   primeiro.parentNode.insertBefore(aviso, primeiro.nextSibling);
+  }else{
+   home.appendChild(aviso);
+  }
+
+ }
+
+ aviso.textContent = mensagemFechado();
 
 }
 
@@ -459,6 +646,12 @@ function dicaPromocao(){
 }
 
 function mostrarEtapa(numero){
+
+ /* Loja fechada (segunda ou fora do horário): não deixa sair da tela inicial */
+ if(numero !== 1 && lojaFechadaHoje()){
+  avisarFechadoSegunda();
+  numero = 1;
+ }
 
  document.querySelectorAll(".tela").forEach(tela=>{
   tela.style.display = "none";
@@ -1192,6 +1385,9 @@ function carregarRascunho(){
 
  try{
 
+  /* Loja fechada: guarda o rascunho para depois, mas não oferece continuar */
+  if(lojaFechadaHoje()) return;
+
   const salvo = localStorage.getItem(CHAVE_RASCUNHO);
 
   if(!salvo) return;
@@ -1370,7 +1566,7 @@ function validarCamposEntrega(){
 
  let valido = true;
 
- const camposObrigatorios = ["nome","telefone","bairro"];
+ const camposObrigatorios = ["nome","telefone","bairro","rua","numero"];
 
  camposObrigatorios.forEach(id=>{
 
@@ -1399,7 +1595,7 @@ function calcularFrete(){
 
 if(!validarCamposEntrega()){
 
- alert("Preencha nome, telefone e bairro para continuar.");
+ alert("Preencha nome, telefone, bairro, rua e número para continuar.\n\nSe a casa não tiver número, escreva S/N.");
  return;
 
 }
@@ -1487,6 +1683,11 @@ let ultimoPedidoEnviado = {codigo:"", msg:""};
 async function finalizarPedido(){
 
  if(enviandoPedido) return;
+
+ if(lojaFechadaHoje()){
+  avisarFechadoSegunda();
+  return;
+ }
 
  const nome =
  document.getElementById("nome").value;
@@ -2092,21 +2293,7 @@ function mostrarSugestoesBairro(){
 
 function atualizarStatusLoja(){
 
- const agora = new Date();
- const dia = agora.getDay();
- const hora = agora.getHours();
-
- let aberta = false;
-
- if((dia>=2 && dia<=6) || dia===0){
-
-  if(hora>=18 && hora<23){
-
-   aberta=true;
-
-  }
-
- }
+ const aberta = lojaAbertaAgora();
 
  const status =
  document.getElementById("statusLoja");
@@ -2120,7 +2307,9 @@ function atualizarStatusLoja(){
 
  }else{
 
-  status.innerHTML="🔴 Fechado";
+  status.innerHTML = diaDaPromocao() === DIA_FECHADO
+  ? "🔴 Fechado (não abrimos às segundas)"
+  : "🔴 Fechado";
   status.className="status fechado";
 
  }
@@ -2130,7 +2319,14 @@ function atualizarStatusLoja(){
 atualizarStatusLoja();
 popularSabores();
 mostrarEtapa(1);
+bloquearBotoesPedido();
 carregarRascunho();
+
+/* confere o horário a cada 30 segundos (abre às 18h e fecha às 23h sozinho) */
+setInterval(()=>{
+ atualizarStatusLoja();
+ bloquearBotoesPedido();
+}, 30000);
 
 function distanciaTexto(a, b) {
 
